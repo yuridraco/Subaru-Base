@@ -31,7 +31,10 @@ const mss = {
     espere: "⏳ Por favor, aguarde...",
     botadm: "🤖 Preciso ser administrador do grupo para fazer isso!",
     grupo: "❗ Este comando só pode ser usado em grupos!",
-    adm: "👑 Este comando é exclusivo para administradores do grupo."
+    adm: "👑 Este comando é exclusivo para administradores do grupo.",
+    dono: "💀Esse comando é exclusivo para o meu dono.",
+    apiErro: "😶‍🌫️ Por algum motivo, a Raikken-Api não retornou dados. Tente novamente, ou avise um adm de lá.",
+    api: "⚡ Enquanto esperamos, que tal dar uma olhada na Raikken? Da uma olhadinha: https://raikken-api.speedhosting.cloud/ "
 };
 
 const sendPoll = (nagatoro, id, name = '', values = [], selectableCount = 1) => { 
@@ -46,6 +49,11 @@ if(i.admin == null) admins.push(i.id)
 }
 return admins
 }
+
+function getAdmins(members) {
+  return members.filter(m => m.admin !== null).map(m => m.id)
+}
+
  
 // =====================EXPORTS =====================\\
 module.exports = {
@@ -72,6 +80,7 @@ module.exports = {
   writeExifImg2,
   writeExifVid2,
   getMembros,
+  getAdmins,
   util,
   loadJSON,  
   saveJSON

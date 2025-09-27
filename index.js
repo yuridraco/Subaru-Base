@@ -10,18 +10,22 @@
 /* ===========================//CONSTS\\================================//*/
 const { default:makeWASocket, DisconnectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, delay, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys } = require("baileys");
 
-const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, cheerio, moment, mss, sendPoll, imageToWebp, videoToWebp, writeExifImg, writeExifVid, imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2, getMembros, util } = require('./dono/exports-consts.js')
+const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, cheerio, moment, mss, sendPoll, imageToWebp, videoToWebp, writeExifImg, writeExifVid, imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2, getMembros, getAdmins, util } = require('./dono/exports-consts.js')
 
-const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken, idCanal, botNumber } = require('./configs/settings.json');
+const { getPlugin, loadPlugins } = require("./dono/functions.js");
+
+const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken, idCanal, botNumber, donoLid, baseRaikkenTinder } = require('./configs/settings.json');
+
 const { menumembros, menuAdm, menubn, menudono, menugeral } = require('./configs/menus.js')
-const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON, saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON } = require('./dono/functions.js')
+
+const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON, saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, onlyNumbers, toUserLid, toUserOrGroupJid } = require('./dono/functions.js')
+
 const { selogpt,seloCriador, seloGpt,seloMeta,seloLuzia,seloLaura,seloCopilot,seloNubank,seloBb,seloBradesco, seloSantander,seloItau, selodoc, pay, seloSz,seloface,seloluzia } = require("./dono/fileSz.js")
 
 const selo = seloSz
 
 const { menuimg, erroImg, defaultAvatar, imgnazista, imggay, imgcorno, imggostosa, imggostoso, imgfeio, imgvesgo, imgbebado, imggado, matarcmd, deathcmd, beijocmd, chutecmd, tapacmd, rnkgay, rnkgado, cmdmenu, rnkcorno, rnkgostoso, rnkgostosa, rnknazista, rnkotaku, rnkpau, suruba, minado_bomb, thumbnail, imgsigma, imgbeta, imgbaiano, imgbaiana, imgcarioca, imglouco, imglouca, imgsafada, imgsafado, imgmacaco, imgmacaca, imgputa, rnksigma, rnkbeta, rnkbaiano, rnkbaiana, rnkcarioca, rnklouco, rnklouca, rnksafada, rnksafado, rnkmacaco, rnkmacaca, errocmd, rnkputa } = require("./configs/links.json")
 
-const baseRaikkenTinder = 'https://raikken-api.speedhosting.cloud/api/tinder'
 const groupMetadataCache = new Map();
 async function getGroupMetadataSafe(groupId) {
 if (groupMetadataCache.has(groupId)) {
@@ -46,19 +50,22 @@ const command = body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase
 const args = body.trim().split(/ +/).slice(1);
 const q = args.join(' ');
 const sz = q
-const from = msg.key.remoteJid || msg.key.remoteLid
+const from = msg.key.remoteJid || msg.key.remoteLid || msg.key.remoteLid
 const isGroup = from.endsWith('@g.us');
-const sender = msg.key.participant || msg.key.remoteJid || msg.key.remoteLid || msg.key.participantLid;
+const sender = msg.key.participant || msg.key.remoteJid || msg.key.remoteLid || msg.key.participantLid || msg.key.participantAlt
 const userJid = info?.key?.participant?.replace(/:[0-9][0-9]|:[0-9]/g, "");
 const type = msg.type
 const isJsonIncludes = (json, value) => {
 if(JSON.stringify(json).includes(value)) return true
 return false}
-const menc_prt = info.message?.extendedTextMessage?.contextInfo?.participant;
+const menc_prt = info?.message?.extendedTextMessage?.contextInfo?.participant || info?.message?.key?.participantLid || null;
 const menc_jid = args?.join(" ").includes('@') ? args.join(" ").replace(/[^0-9]/g, '') + "@s.whatsapp.net" : "";
-const menc_jid2 = info.message?.extendedTextMessage?.contextInfo?.mentionedJid;
+const menc_jid2 = info?.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
 const sender_ou_n = q.includes("@") ? menc_jid : sender;
 const menc_os2 = q.includes("@") ? menc_jid : menc_prt;
+const usuariosMencionados = info?.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+const usuarioRespondido = info?.message?.extendedTextMessage?.contextInfo?.participant || null;
+const alvo = usuariosMencionados.length > 0 ? usuariosMencionados[0] : usuarioRespondido;
 const baileysIs = (message, type) => !!(message.message?.[type] || message[type]);
 const isImage = baileysIs(info, "imageMessage");
 const isVideo = baileysIs(info, "videoMessage");
@@ -87,10 +94,10 @@ const isQuotedViewOnce = quotedType === 'viewOnceMessage' || quotedType === 'vie
 const isQuotedDocW = quotedType === 'documentWithCaptionMessage'
 const imgCaption   = (isQuotedImage ? quoted?.imageMessage?.caption : info.message?.imageMessage?.caption) || "";
 const vidCaption   = (isQuotedVideo ? quoted?.videoMessage?.caption : info.message?.videoMessage?.caption) || "";
-const convText     = (isQuotedMsg ? quoted?.conversation : info.message?.conversation) || "";
-const extdText     = (isQuotedText ? quoted?.extendedTextMessage?.text : info.message?.extendedTextMessage?.text) || "";
-const docNoCap     = (isQuotedDocument ? quoted?.documentMessage?.caption : info.message?.documentMessage?.caption) || "";
-const docWCap      = (isQuotedDocW ? quoted?.documentWithCaptionMessage?.message?.documentMessage?.caption : info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption) || "";
+const convText = (isQuotedMsg ? quoted?.conversation : info.message?.conversation) || "";
+const extdText = (isQuotedText ? quoted?.extendedTextMessage?.text : info.message?.extendedTextMessage?.text) || "";
+const docNoCap = (isQuotedDocument ? quoted?.documentMessage?.caption : info.message?.documentMessage?.caption) || "";
+const docWCap  = (isQuotedDocW ? quoted?.documentWithCaptionMessage?.message?.documentMessage?.caption : info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption) || "";
 
 function getGroupAdmins(participants) {
 admins = []
@@ -100,7 +107,6 @@ if(i.admin == 'superadmin') admins.push(i.id)
 }
 return admins
 }
-
 const groupMetadata = isGroup ? await subaru.groupMetadata(from): ""
 const participants = isGroup ? await groupMetadata.participants : ''
 const groupName = isGroup? groupMetadata.subject: ""
@@ -112,15 +118,15 @@ const cmd = isCmd ? content.slice(1).trim().split(/ +/).shift().toLocaleLowerCas
 const comando = cmd;
 const pushname = info.pushName ? info.pushName : ""
 const numeroBot = subaru.user.id.split(":")[0]+"@s.whatsapp.net"
-const isDono = sender.includes(donoNmr)
+const isDono = sender.includes(donoNmr) || sender === donoLid
 const isGroupAdmins = groupAdmins.includes(sender) || false || isDono
-const isAdm = groupAdmins.includes(sender) || false|| isDono
+const isAdm = groupAdmins.includes(sender) || false || isDono
 const isBotGroupAdmins = groupAdmins.includes(numeroBot) || false
 const participantes = isGroup ? groupMetadata.participants.map(usuario => usuario.id) : ''
 const mencionados = isGroup ? participantes.sort(() => 0.5 - Math.random()).slice(0, 5) : '' 
 var budy = info?.message?.conversation || info?.message?.extendedTextMessage?.text || '';
 const adivinha = info.key.id.length > 21 ? 'Android' : info.key.id.substring(0, 2) == '3A' ? 'iPhone' : 'WhatsApp Web';
-const somembros = isGroup ? getMembros(groupMembers) : ''
+const somembros = isGroup ? (groupMembers.length > 0 ? getMembros(groupMembers) : getAdmins(groupMembers)) : []
 //====================( FACILITADORES )====================//
 const esperar = (tempo) => {
 return new Promise(resolve => setTimeout(resolve, tempo));
@@ -134,7 +140,6 @@ chunks.push(chunk);
 }
 return chunks;
 }
-
 
 //====================( FUNÇÕES DE ENVIO DE MÍDIA )====================//
 // Envia uma resposta de texto estilizada como se fosse de um canal.
@@ -359,11 +364,15 @@ await subaru.sendMessage(from, {sticker: fs.readFileSync(resultadoSt[0].value), 
 await fs.unlinkSync(resultadoSt[0].value)
 } catch(e) {console.log(e)}
 }
-//====================( FUNÇÕES DO RENAME )====================//
+//====================( FIM - FUNÇÕES DO RENAME )====================//
 
 //====================( FUNÇÕES DE REAÇÃO )====================//
 // Reage a uma mensagem
 const react = (reassao) => {
+subaru.sendMessage(from, { react: { text: reassao, key: info.key } });
+}
+
+const reagir = (reassao) => {
 subaru.sendMessage(from, { react: { text: reassao, key: info.key } });
 }
 
@@ -440,8 +449,6 @@ function setNes(index){
 fs.writeFileSync(nescj, JSON.stringify(index, null, 2) + '\n')}
 function setGp(index){
 fs.writeFileSync(PastaDeGrupos, JSON.stringify(index, null, 2) + '\n')}
-
-
 
 //====================( CONSTS DE GRUPOS )====================//
 const isAntiLink = isGroup ? ArquivosDosGrupos?.[0]?.antilink : undefined
@@ -597,7 +604,6 @@ mention(chatMove);
 } 
 }
 
-
 //=====( ABAIXO O COUNTMESSAGE )=====\\
 const countMessage = JSON.parse(fs.readFileSync('./database/countmessage/countmsg.json'));
 const groupIdscount = [];
@@ -658,6 +664,34 @@ JSON.stringify(countMessage, null, 2) + "\n"
 );
 }
 
+//==========( ABAIXO OS COMANDOS POR FIGURINHA )==========\\
+/* ⚠️LEMBRE SE DE MUDAR O ID DAS FIGURINHAS. ⚠️
+* Use o comando: stickerid para obter o id da figurinha. 
+* O id correspondente você copia e cola no nome da case, como está abaixo.
+* Sim, é um número grande kkkj.
+*/
+const ID_STICKER = info?.message?.stickerMessage?.fileSha256?.toString('base64');
+switch (ID_STICKER) {
+
+ case '224,29,192,69,230,158,143,233,214,97,171,139,34,202,216,5,213,12,19,109,66,2,13,44,190,228,78,235,5,183,50,44': {
+ if (!isAdm && !isDono) return;
+ await subaru.groupSettingUpdate(from, "not_announcement");
+ await reply("Grupo aberto!");
+ break;
+ }
+ 
+ case '255,188,36,70,82,133,151,88,212,31,209,208,178,175,33,239,17,88,170,129,25,64,163,175,2,13,240,49,94,160,133,2': {
+ if (!isAdm && !isDono) return;
+ await subaru.groupSettingUpdate(from, "announcement");
+ await reply("Grupo fechado!");
+ break
+ }
+
+default:
+//console.log('ID da figurinha não reconhecido:', ID_STICKER);
+
+}//CUIDADO! AQUI FECHA O SWITCH DOS COMANDOS POR FIGURINHA!!
+
 //=====( ABAIXO OS COMANDOS SEM PREFIXO )=====\\
 if (isBanchat && !isDono) { return //console.log(`Comando efetuado, mas tô off.`) 
 }
@@ -686,9 +720,80 @@ if (!checkPrefix(body, prefix)) {
  await react("🗑")
  break;}
  
-}//SWITCH
+ case 'prefixo': {
+ await subaru.sendMessage(from, {text: `> ┏╾ׁ╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┓֪࣪
+> │ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
+> ┃࣪ ┃֪ׅ࣪ׄ᨞⁞❄️✿𖥔࣪ Olá, eu sou o ${botName} ❄️
+> ┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪Esse é o meu prefixo: ${prefix}
+> ┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ Leia o 『 ${prefix}menu 』
+> ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
+> ┗╾ׁ┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`}, {quoted: info})
+ break
+ }
+ 
+}//SWITCH COMANDOS SEM PREFIXO
+
+//Comando Play, optei por usar um humilde regex (por isso aquela postagem de explicação, não viu? Vai lá no canal, kk).
+if (body && /^p\s+/i.test(body.trim())) {
+const q1 = body.trim().slice(1).trim(); 
+await react("🎵");
+try {
+let videoInfo;
+const isUrl = /https?:\/\/(www\.)?youtube\.com\/|youtu\.be\//.test(q);
+if (isUrl) {
+reply('⚡ Processando seu link...');
+let res = await fetch(`https://raikken-api.speedhosting.cloud/api/play2?url=${encodeURIComponent(q1)}&apikey=${RaikkenKey}`);
+let json = await res.json();
+if (!json.status) throw new Error('Não foi possível processar o link. Tente novamente.');
+let result = json.resultado;
+videoInfo = {
+titulo: result.Título,
+duracao: result.Duração,
+thumb: result.Thumbnail,
+canal: result.Canal,
+views: result.Views,
+url: q1
+}} else {
+reply('🔎 Buscando sua música...');
+let res = await fetch(`https://raikken-api.speedhosting.cloud/api/play/search?query=${encodeURIComponent(q1)}&apikey=${RaikkenKey}`);
+let json = await res.json();
+if (!json.status || !json.resultado) throw new Error('Não foi possível encontrar a música com esse nome.');
+let result = json.resultado;
+videoInfo = {
+titulo: result.titulo,
+duracao: result.duracao,
+thumb: result.thumb,
+canal: result.canal,
+views: result.views,
+url: result.url
+}}
+let data = moment().tz('America/Sao_Paulo').format('DD/MM/YYYY');
+let hora = moment().tz('America/Sao_Paulo').format('HH:mm:ss');
+let textin = `┏╾╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┓֪࣪
+│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *🎵 Música Encontrada!*  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Título:* ${videoInfo.titulo}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Duração:* ${videoInfo.duracao}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Canal:* ${videoInfo.canal || 'N/A'}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Views:* ${videoInfo.views ? videoInfo.views.toLocaleString('pt-BR') : 'N/A'}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Link:* ${videoInfo.url}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Data:* ${data}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Hora:* ${hora}  
+┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
+┗╾ׁ┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ╼┛`;
+await subaru.sendMessage(from, { image: { url: videoInfo.thumb }, caption: textin, footer: '🎶 Selecione uma opção abaixo',
+buttons: [
+{ buttonId: `${prefix}play ${videoInfo.url}`, buttonText: { displayText: '🎧 Áudio' }, type: 1 },
+{ buttonId: `${prefix}playvideo ${videoInfo.url}`, buttonText: { displayText: '▶️ Vídeo' }, type: 1 },
+{ buttonId: `${prefix}playdoc ${videoInfo.url}`, buttonText: { displayText: '📄 Documento' }, type: 1 }], headerType: 4}, { quoted: seloSz });
+} catch (e) {
+console.log(e);
+reply(`❌ Ocorreu um erro: *_${e.message}_*`)}
+return
+}
 
 if (body.toLowerCase().includes(`💀`)) {
+if(!isQuotedSitcker) return;
 console.log('comando dado')
 reply2('⏳ Aguarde, processando figurinha...');
 react("😎")
@@ -873,6 +978,17 @@ notcmd = `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ�
 return notcmd
 }
 
+//=====( ABAIXO OS COMANDOS POR PLUGIN )=====\\ 
+loadPlugins()
+const plugin = getPlugin(cmd);
+if (plugin) {
+try {
+await plugin.run({ subaru, msg, args, from, sender, isGroup, pushname, reply, seloSz, react, isAdm, isDono, isGroupAdmins, isBotGroupAdmins, });
+} catch (e) {
+console.error(`❌ Erro no plugin ${cmd}:`, e);
+}
+//=====( ABAIXO OS COMANDOS POR CASE )=====\\ 
+} else {   
 try {
 switch (command) {
 
@@ -883,6 +999,7 @@ await subaru.sendMessage(from, { text: `🔎 Debug do seu LID:\n
 > - remoteJid: ${msg.key.remoteJid || 'não veio'}
 > - remoteLid: ${msg.key.remoteLid || 'não veio'}
 > - participant: ${msg.key.participant || 'não veio'}
+> - participantAlt: ${msg.key.participantAlt || 'não veio'}
 > - participantLid: ${msg.key.participantLid || 'não veio'}`});
 }
 break;
@@ -1285,28 +1402,36 @@ break
 
 case 'chance':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(args.length < 1) return reply(`Você precisa digitar da forma correta... Por exemplo: *${prefix}chance* _do jubileu ser gay_`)
 await subaru.sendMessage(from, {text: `😵‍💫🌟 - A chance _“${q}”_ é de: *${Math.floor(Math.random() * 100)}%*. Eai, foi o que a probabilidade que esperava jovem?`, mentions: [sender]}, {quoted: selo});
 break
 
 case 'comer':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer botar rebolar pros cria, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/d46ff5e2b8f4c5335e362.mp4`}, gifPlayback: true, caption: `Você acabou de comer a(o) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'capinarlote':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer botar pra capinar um lote, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/4682c1b474ce5dee3a48d.mp4`}, gifPlayback: true, caption: `Você acabou de botar o(a) *@${menc_os2.split('@')[0]}* pra capinar um lote`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'pgpeito':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer pegar nos peitinhos, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/52d46e2c58318b8cfcacc.mp4`}, gifPlayback: true, caption: `Você acabou de pegar nos peitos do(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
@@ -1314,7 +1439,9 @@ break
 
 case 'pgpau':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer pegar no pau dele(a), a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/5073ba8be6b099ed812a7.mp4`}, gifPlayback: true, caption: `Você acabou de pegar no pau do(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
@@ -1322,56 +1449,72 @@ break
 
 case 'pgbunda':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que desejas ser acariciado, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/e62de1e6863c59d284b2e.mp4`}, gifPlayback: true, caption: `Você acabou de pegar na bunda do(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'morder':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer dar uma mordida, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/75e4c0273be625a2363ce.mp4`}, gifPlayback: true, caption: `Você acabou de dar uma mordida no(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'sentar':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer dar uma sentadinha, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/d695e05443043ff9a254d.mp4`}, gifPlayback: true, caption: `Você acabou de dar uma sentadinha no(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'tirarft':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer tirar a foto, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/7193308e3949803132bad.mp4`}, gifPlayback: true, caption: `Você acabou de tirar uma foto do(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'estuprar':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque a pessoa que você quer comer a força, a mensagem ou o @');
 await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/kusu1d.mp4`}, gifPlayback: true, caption: `Ta prr 🔥 *@${menc_os2.split('@')[0]}* Você foi estuprado 😰` , mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'boquete':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque a pessoa que você quer botar pra mamar, a mensagem ou o @');
 await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/4hvf79.mp4`}, gifPlayback: true, caption: `Eita *@${menc_os2.split('@')[0]}* garganta profunda voce tem 😰` , mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'cagar':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque a pessoa que você quer botar pra cagar, a mensagem ou o @');
 await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/662vzj.mp4`}, gifPlayback: true, caption: `CARALHOOOOO *@${menc_os2.split('@')[0]}* FAMOSO CAGA TRONCO KAKAKAKAK??? 🤯😳` , mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'cu':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando quantos cm de profundidade tem seu bozo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1383,28 +1526,36 @@ break
 
 case 'abraco':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer dar um abraço, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://files.catbox.moe/ecw188.mp4`}, gifPlayback: true, caption: `Você acabou de dar um abraço fofo no(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'lavarlouca':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer botar pra lavar a louça, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://files.catbox.moe/qptf5k.mp4`}, gifPlayback: true, caption: `Você acabou de botar a(o) *@${menc_os2.split('@')[0]}* pra lavar a louça`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'carinho':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer dar um carinho, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/2b6b4f4e38214bd6164ce.mp4`}, gifPlayback: true, caption: `Você acabou de dar um carinho no(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
 case 'morte': case 'death':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if (args.length == 0) return reply(`Está faltando o nome da pessoa! Por exemplo: ${prefix+command} Victor`)
 predea = await axios.get(`https://api.agify.io/?name=${encodeURIComponent(args[0])}`);
 if (predea.data.age == null) return reply(`Você inseriu um nome invalido, certifique-se de inserir um sem acentos, emojis, números e outros.`);
@@ -1441,7 +1592,9 @@ break
 
 case 'nazista':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de nazista: *@${sender_ou_n.split("@")[0]}* aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1451,7 +1604,9 @@ break
 
 case 'gay':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de gay: @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1464,7 +1619,9 @@ break
 
 case 'feio':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de feio: *@${sender_ou_n.split("@")[0]}* aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
  setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1476,7 +1633,9 @@ break
 
 case 'corno':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a ficha de corno @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1486,7 +1645,9 @@ break
 
 case 'vesgo':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a ficha de vesgo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
  setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1496,7 +1657,9 @@ break
 
 case 'bebado':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a ficha de bebado(a) @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1506,7 +1669,9 @@ break
 
 case 'gado':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a ficha de gado @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1516,7 +1681,9 @@ break
 
 case 'fiel':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a ficha de fiel @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1526,7 +1693,9 @@ break
 
 case 'lindo':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a ficha de lindo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1536,7 +1705,9 @@ break
 
 case 'linda':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a ficha de linda @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1546,7 +1717,9 @@ break
 
 case 'gostoso':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a sua ficha de gostoso @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
  setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1556,7 +1729,9 @@ break
 
 case 'gostosa':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await subaru.sendMessage(from, {text:`Pesquisando a sua ficha de gostosa @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
@@ -1568,13 +1743,17 @@ case 'chute':
 case 'chutar':
 if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+;
 if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer da um chute, a mensagem ou o @')
 await subaru.sendMessage(from, {video: {url: chutecmd}, gifPlayback: true, caption: `Você acabou de dar um chute em *@${menc_os2.split('@')[0]}*.`, mentions: [menc_os2]}, {quoted: selo})
 break 
 
 case 'dogolpe':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if(!menc_os2 || menc_jid2[1]) return reply('Marque a mensagem com o comando ou marque o @ do usuário..')
 randomF = ["𝐄𝐌 𝐈𝐋𝐔𝐃𝐈𝐑 𝐏𝐄𝐒𝐒𝐎𝐀𝐒", "𝐄𝐌 𝐅𝐄𝐑𝐈𝐑 𝐎𝐒 𝐒𝐄𝐍𝐓𝐈𝐌𝐄𝐍𝐓𝐎𝐒", "𝐄𝐌 𝐃𝐀𝐑 𝐂𝐇𝐈𝐅𝐑𝐄"]
 await subaru.sendMessage(from, {text: `𝐎(𝐀) *@${menc_os2.split("@")[0]}* 𝐄 𝐄𝐒𝐏𝐄𝐂𝐈𝐀𝐋𝐈𝐒𝐓𝐀: ${randomF[Math.floor(Math.random() * randomF.length)]}.`, mentions: [menc_os2]}, {quoted: selo})
@@ -1583,13 +1762,17 @@ break
 case 'shipo':
 if(!isGroup) return reply("Somente em grupos.");
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+;
 if(!menc_os2) return reply('Marque uma pessoa do grupo para encontrar o par dela.');
 await mention(`『💘』𝐄𝐔 𝐒𝐇𝐈𝐏𝐎:\n@${groupMembers[Math.floor(Math.random() * groupMembers.length)].id.split('@')[0]}\n\n@${menc_os2.split("@")[0]}\n\n𝐂𝐎𝐌 𝐔𝐌𝐀 𝐏𝐎𝐑𝐒𝐄𝐍𝐓𝐀𝐆𝐄𝐌 𝐃𝐄: *${Math.floor(Math.random() * 100)+"%"}*.`);
 break
 
 case 'casal':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 await reagir("💘");
 var m1= groupMembers[Math.floor(Math.random() * groupMembers.length)].id
 var m2= groupMembers[Math.floor(Math.random() * groupMembers.length)].id
@@ -1603,7 +1786,9 @@ break
 
 case 'gozar': case 'goza'://by tzn pau de me
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 reagir("😈")
 const gozars = ['Você acabou de gozar na boca do(a)','Você acabou de gozar no cuzinho do(a)','Você acabou de gozar na bucetinha do(a)', 'Você acabou de gozar no pé do(a)', 'Você acabou de gozar na cabeça do(a)', 'Você acabou de gozar na cara do(a)', 'Você acabou de gozar na barriga do(a)', 'Você acabou de gozar no olho do(a)', 'Você acabou de gozar na útero do(a)', 'Você acabou de gozar no cabelo do(a)', 'Você acabou de gozar na boca do(a)', 'Você acabou de gozar no umbigo do(a)', 'Você acabou de gozar nas costas do(a)', 'Você acabou de gozar nos braços do(a)', 'Você acabou de gozar na mão do(a)',] 
 const gozacao = gozars[Math.floor(Math.random() * gozars.length)];
@@ -1633,6 +1818,8 @@ break;
 case 'vab': case 'vcprefere': case 'voceprefere':
 if(!isGroup) return reply("Somente em grupos.");
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+;
 await reagir('😸'); /* Reação à mensagem, quando solicitar a execução do comando. */
 await psycatgames().then(async(array) => {
 const { nsfw, questions } = array[Math.floor(Math.random() * array.length)];
@@ -1646,7 +1833,10 @@ break;
 
 case 'rankgay': case 'rankgays':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 ABC = `[🏳️‍🌈]𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐆𝐀𝐘 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n—\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}°『${Math.floor(Math.random() * 100)}%』- @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1657,8 +1847,8 @@ break
 case 'rankcasalzin': case 'rankcasais': case 'rankcasal':
 if (!isGroup) return reply("Somente em grupos.");
 if (!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 await reagir("💞");
-
 const membros = groupMembers;
 const casais = [];
 for (let i = 0; i < 10; i++) {
@@ -1683,23 +1873,19 @@ const casaisTEXT = [
 ];
 
 const rankzincasalzinimg = "https://files.catbox.moe/0b8878.jpg";
-
 let rankzincasalzin = `『 ❣ 』𝐑𝐀𝐍𝐊 𝐂𝐀𝐒𝐀𝐈𝐒 𝐃𝐎 𝐂𝐇𝐀𝐓︎ \n\n`;
-
 for (let i = 0; i < casais.length; i += 2) {
 if (casais[i + 1]) {
-rankzincasalzin += `@${casais[i].id.split('@')[0]} e @${casais[i + 1].id.split('@')[0]}\n${casaisTEXT[Math.floor(Math.random() * casaisTEXT.length)]}\n\n`;
-}
-}
-
+rankzincasalzin += `@${casais[i].id.split('@')[0]} e @${casais[i + 1].id.split('@')[0]}\n${casaisTEXT[Math.floor(Math.random() * casaisTEXT.length)]}\n\n`;}}
 rankzincasalzin += `${botName}`;
-
 mencionarIMG(rankzincasalzin, rankzincasalzinimg);
 break;
 
 case 'rankfalido': case 'rankfalidos':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 var porcentagem = `${Math.floor(Math.random() * 105)}`
 membr = []
 const falido1 = groupMembers
@@ -1763,7 +1949,10 @@ break;
 
 case 'rankcu':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 membr = []
 const cu1 = groupMembers
 const cu2 = groupMembers
@@ -1796,7 +1985,11 @@ break
 
 case 'rankbct': case 'rankbuceta': case 'rankbucetudas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
  var porcentagem = `${Math.floor(Math.random() * 105)}`;
  membr = [];
  
@@ -1860,7 +2053,10 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
 
 case 'rankgado': case 'rankgados':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 ABC = `𝐓𝐎𝐏 5 𝐌𝐀𝐈𝐒 𝐆𝐀𝐃𝐎𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n—\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}°『${Math.floor(Math.random() * 100)}%』@${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1871,6 +2067,9 @@ break
 case 'rankcorno': case 'rankcornos':
 if(!isGroup) return reply("Somente em grupos.");
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+;
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 ABC = `🐂 𝐓𝐎𝐏 5 𝐌𝐀𝐈𝐒 𝐂𝐇𝐈𝐅𝐑𝐔𝐃𝐎𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n—\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1881,7 +2080,9 @@ break
 case 'surubao': case 'suruba':
 await reagir("😈")
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 if (!q) return reply(`Eita, coloque o número de pessoas após o comando.`)
 if (Number(q) > 1000) return reply("Coloque um número menor, ou seja, abaixo de *1000*.")
 frasekk = [`tá querendo relações sexuais a ${q}, topa?`, `quer que *${q}* pessoas venham de *chicote, algema e corda de alpinista*.`, `quer que ${q} pessoas der tapa na cara, lhe chame de cachorra e fud3r bem gostosinho...`]
@@ -1895,7 +2096,10 @@ break
 
 case 'rankgostosos': case 'rankgostoso':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 ABC = `🔥 𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐆𝐎𝐒𝐓𝐎𝐒𝐎𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n—\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}°『${Math.floor(Math.random() * 100)}%』- @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1905,7 +2109,11 @@ break
 
 case 'rankgostosas': case 'rankgostosa':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `😏 𝐑𝐀𝐍𝐊 𝐃𝐀𝐒 5 𝐌𝐀𝐈𝐒 𝐆𝐎𝐒𝐓𝐎𝐒𝐀𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n—\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1915,7 +2123,11 @@ break
 
 case 'ranknazista': case 'ranknazistas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `💂‍♂𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐍𝐀𝐙𝐈𝐒𝐓𝐀 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎 卐\n—\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1926,6 +2138,10 @@ break
 case 'rankotaku': case 'rankotakus':
 if(!isGroup) return reply("Somente em grupos.");
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+;
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `㊙ 𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐎𝐓𝐀𝐊𝐔𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎 \n—\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1935,7 +2151,9 @@ break
 
 case 'ranksigma': case 'ranksigmas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `🗿🍷 𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐒𝐈𝐆𝐌𝐀𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1945,7 +2163,9 @@ break;
 
 case 'rankbeta': case 'rankbetas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `😂 𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐁𝐄𝐓𝐀𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1955,7 +2175,9 @@ break;
 
 case 'rankbaiano': case 'rankbaianos':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `💤 𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐁𝐀𝐈𝐀𝐍𝐎𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1965,7 +2187,9 @@ break;
 
 case 'rankbaiana': case 'rankbaianas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `😴 𝐑𝐀𝐍𝐊 𝐃𝐀𝐒 5 𝐌𝐀𝐈𝐒 𝐁𝐀𝐈𝐀𝐍𝐀𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1975,7 +2199,9 @@ break;
 
 case 'rankcarioca': case 'rankcariocas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `🔫 𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐂𝐀𝐑𝐈𝐎𝐂𝐀𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1985,7 +2211,9 @@ break;
 
 case 'ranklouco': case 'rankloucos':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `💀 𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐋𝐎𝐔𝐂𝐎𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -1995,7 +2223,9 @@ break;
 
 case 'ranklouca': case 'rankloucas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `💀 𝐑𝐀𝐍𝐊 𝐃𝐀𝐒 5 𝐌𝐀𝐈𝐒 𝐋𝐎𝐔𝐂𝐀𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -2005,7 +2235,9 @@ break;
 
 case 'ranksafada': case 'ranksafadas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `🔥 𝐑𝐀𝐍𝐊 𝐃𝐀𝐒 5 𝐌𝐀𝐈𝐒 𝐒𝐀𝐅𝐀𝐃𝐈𝐍𝐇𝐀𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -2015,7 +2247,9 @@ break;
 
 case 'ranksafado': case 'ranksafados':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐒𝐀𝐅𝐀𝐃𝐈𝐍𝐇𝐎𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎🥵\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -2025,7 +2259,9 @@ break;
 
 case 'rankmacaco': case 'rankmacacos':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `🐒 𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐒 𝐌𝐀𝐂𝐀𝐂𝐎𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -2035,7 +2271,9 @@ break;
 
 case 'rankmacaca': case 'rankmacacas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `🙈 𝐑𝐀𝐍𝐊 𝐃𝐀𝐒 5 𝐌𝐀𝐈𝐒 𝐌𝐀𝐂𝐀𝐂𝐀𝐒 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎 \n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -2045,7 +2283,9 @@ break;
 
 case 'rankputa': case 'rankputas':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `🔞 𝐑𝐀𝐍𝐊 𝐃𝐀𝐒 5 𝐌𝐀𝐈𝐒 𝐏𝐔𝐓𝐀 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• ${i+1}° 『${Math.floor(Math.random() * 100)}%』 - @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -2055,7 +2295,9 @@ break;
 
 case 'rankpau':
 if(!isGroup) return reply("Somente em grupos.")
-if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.")
+if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
+if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
+
 ABC = `𝐑𝐀𝐍𝐊 𝐃𝐎𝐒 5 𝐌𝐀𝐈𝐎𝐑𝐄𝐒 𝐏𝐀𝐔 𝐃𝐎 𝐆𝐑𝐔𝐏𝐎\n—\n`
 for (var i = 0; i < 5; i++) {
 ABC += `• *${i+1}°* @${somembros[Math.floor(Math.random() * somembros.length)].split("@")[0]}\n\n`
@@ -2067,6 +2309,109 @@ break
 
 
 //=====( ABAIXO OS COMANDOS DE DONO )=====\\
+
+case 'setconfig': {
+if (!isDono) return reply(mss.dono)
+if (isGroup) return reply("❌ Esse comando só pode ser usado no PV do bot.")
+const configPath = './configs/settings.json' 
+let config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+const settingsMap = [
+"prefix",
+"botName",
+"botNumber",
+"donoName",
+"donoNmr",
+"donoLid",
+"baseRaikken",
+"RaikkenKey",
+"idCanal"
+]
+
+const [key, ...valueArr] = q.split(' ')
+if (!key || !valueArr.length) {return reply(`⚠️ Formato errado!\n\nExemplo:\n${prefix}setconfig prefix !\n\nChaves disponíveis:\n${settingsMap.join(', ')}`)}
+const settingKey = key.trim()
+const newValue = valueArr.join(' ')
+if (!settingsMap.includes(settingKey)) {return reply(`❌ Chave *${settingKey}* não existe!\nChaves válidas: ${settingsMap.join(', ')}`)}
+config[settingKey] = newValue
+fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
+reply(`✔️ Configuração *${settingKey}* alterada para:\n${newValue}`)
+}
+break
+
+case "backup":{
+if (!isDono) return reply(mss.dono)
+const { execSync } = require("child_process");
+const ls = (await execSync("ls")).toString().split("\n").filter(
+  (pe) =>
+pe != "node_modules" &&
+pe != "package-lock.json" &&
+pe != "yarn.lock" &&
+pe != "tmp" &&
+pe != ""
+);
+const exec = await execSync(`zip -r subaru-backup.zip ${ls.join(" ")}`);
+await reply("Aguarde, estarei fazendo o backup e enviando no PV do dono")
+await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { document: await fs.readFileSync("./subaru-backup.zip"), mimetype: "application/zip", fileName: "subaru-backup.zip"},{quoted: seloSz}); await execSync("rm -rf subaru-backup.zip");
+await reply(`Prontinho ${donoName}, fiz o backup e enviei no seu pv.`)
+break}
+
+case 'help': {
+await react("⚡");
+const fs = require('fs');
+const helpText = require('./database/textos/helpText.json');
+const rows = helpText.map(item => ({
+title: item.nomeAjuda.toUpperCase(),
+description: `Ajuda sobre ${item.nomeAjuda}`,
+id: `${prefix}${item.nomeAjuda}`
+}));
+
+await subaru.relayMessage(from, {
+interactiveMessage: {
+header: proto.Message.InteractiveMessage.Header.create({
+...(await prepareWAMessageMedia(
+{ image: fs.readFileSync('./database/imgs/perfil.jpeg') },
+{ upload: subaru.waUploadToServer }
+)),
+hasMediaAttachment: false,
+title: `📖 Central de Ajuda`
+}),
+body: { 
+text: `👋 Olá ${pushname}!\nEscolha abaixo o que você precisa de ajuda:`
+},
+footer: { text: `${botName}` },
+nativeFlowMessage: {
+buttons: [
+{
+name: "single_select",
+buttonParamsJson: JSON.stringify({
+title: "AJUDA DISPONÍVEL",
+sections: [
+{
+title: "Central de Ajuda",
+rows: rows
+}
+]
+})
+}
+],
+messageParamsJson: "",
+},
+},
+}, {});
+break;
+}
+
+case 'stickerid': {
+try {
+const quoted = info.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+if (!quoted?.stickerMessage) {return reply('Responda a uma figurinha para obter o ID.')}
+const stickerId = quoted.stickerMessage.fileSha256.toString('base64');
+reply(`ID da figurinha:\n${stickerId}`);
+} catch (e) {
+console.error(e);
+reply('Erro ao obter o ID da figurinha.');
+}}
+break;
 
 case 'rgtm':
 if(!isDono) return;
@@ -2157,7 +2502,7 @@ novidades.forEach((item, index) => {
 response += `┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪${index + 1}. *Comando*: \`${item.Comando}\`\n┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Função*: ${item.Função}\n\n`;
 });
 
-const meta = await subaru.groupMetadata(from);
+const meta = await getGroupMetadataSafe(from);
 const membros = meta.participants.map(i => i.id);
 await sleep(500);
 await subaru.relayMessage(from, {
@@ -2364,18 +2709,18 @@ break;}
 
 case 'banchat':
 if(!isGroup) return reply(mss.grupo)
-if(!isGroupAdmins) return reply(mss.adm)
+if(!isDono) return reply("Somente dono")
 if(q.length < 1) return enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
 if(Number(q[0]) === 1) {
 if(isBanchat) return enviar('_Isso já está ativo, senhor._')
 ArquivosDosGrupos[0].banchat = true
 ModificaGrupo(ArquivosDosGrupos)
-enviar('*_O foi ativado com sucesso nesse grupo 😋_*.')
+enviar(`*_O bot foi desativo desse grupo. Apenas o ${nmrDono} pode desbanir._*.`)
 } else if(Number(q[0]) === 0) {
-if(!isBanchat) return enviar('Isso já ta off 😪')
+if(!isBanchat) return enviar('já ta off 😪')
 ArquivosDosGrupos[0].banchat = false
 ModificaGrupo(ArquivosDosGrupos)
-enviar('*_O bot foi desativado com sucesso nesse grupo 🫩_*')
+enviar('*_O bot foi ativado com sucesso nesse grupo!!_*')
 } else {
 enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
 }
@@ -2456,6 +2801,29 @@ break
 
 
 //=====( ABAIXO OS COMANDOS DE ADM )=====\\
+case 'ban': {
+if (!isGroup) return reply(mss.grupo);
+if (!isGroupAdmins) return reply(mss.adm);
+if (!isBotGroupAdmins) return reply(mss.botadm);
+try {
+if (!alvo) {return enviar("Você precisa mencionar um usuário (@user) ou responder à mensagem dele para banir.")}
+if (!JSON.stringify(groupMembers).includes(alvo)) {return enviar("Este usuário não está no grupo ou já foi removido.")}
+const getCleanId = (jid) => jid ? jid.split('@')[0] : "";  
+if (getCleanId(alvo) === getCleanId(numeroBot)) {
+return enviar('Eu não vou me banir, kk.')}
+if (getCleanId(alvo) === getCleanId(donoNmr) || getCleanId(alvo) === getCleanId(donoLid)) {
+return enviar('*Acha mesmo que eu vou banir meu criador?*')}
+await subaru.groupParticipantsUpdate(from, [alvo], "remove");   
+await sleep(300);
+await subaru.sendMessage(from, { text: `*Prontinho, membro removido!*`, mentions: [sender] });
+} catch (e) {
+console.log(e);
+reply("Ocorreu um erro ao tentar banir o usuário.");
+}
+break;
+}
+
+
 case 'rankativos': 
 case 'rankativo':
 if(!isGroup) return reply(mss.grupo)
@@ -2845,10 +3213,10 @@ if(!isGroupAdmins) return reply(mss.adm)
 if(!isBotGroupAdmins) return reply(mss.botadm)
 const imgCaption   = (isQuotedImage ? quoted?.imageMessage?.caption : info.message?.imageMessage?.caption) || "";
 const vidCaption   = (isQuotedVideo ? quoted?.videoMessage?.caption : info.message?.videoMessage?.caption) || "";
-const convText     = (isQuotedMsg ? quoted?.conversation : info.message?.conversation) || "";
-const extdText     = (isQuotedText ? quoted?.extendedTextMessage?.text : info.message?.extendedTextMessage?.text) || "";
-const docNoCap     = (isQuotedDocument ? quoted?.documentMessage?.caption : info.message?.documentMessage?.caption) || "";
-const docWCap      = (isQuotedDocW ? quoted?.documentWithCaptionMessage?.message?.documentMessage?.caption : info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption) || "";
+const convText = (isQuotedMsg ? quoted?.conversation : info.message?.conversation) || "";
+const extdText = (isQuotedText ? quoted?.extendedTextMessage?.text : info.message?.extendedTextMessage?.text) || "";
+const docNoCap = (isQuotedDocument ? quoted?.documentMessage?.caption : info.message?.documentMessage?.caption) || "";
+const docWCap  = (isQuotedDocW ? quoted?.documentWithCaptionMessage?.message?.documentMessage?.caption : info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption) || "";
 var options = "";
 var imageMessage = isQuotedImage ? quoted?.imageMessage : info.message?.imageMessage;
 var videoMessage = isQuotedVideo ? quoted?.videoMessage : info.message?.videoMessage;
@@ -3170,8 +3538,7 @@ let caption = `
 ┃࣪ ┃࣪ 📅 *Data:* ${data}
 ┃࣪ ┃࣪ ⏰ *Hora:* ${hora}
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
-┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛
-> _Raikken API⚡_`;
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`;
 
 await subaru.sendMessage(from, { image: { url: result.thumb }, caption }, { quoted: info });
 await subaru.sendMessage(from, { audio: { url: result.download }, mimetype: 'audio/mpeg', fileName: `${result.titulo}.mp3`, ptt: false }, { quoted: info });
@@ -3180,13 +3547,69 @@ console.log(e);
 reply(`Ocorreu um erro ao buscar a música. Erro: *_${e.message}_*`)}
 break;}
 
+case 'playdoc': {
+if (!q || !q.startsWith('http')) {
+return reply('❌ Link do YouTube inválido ou não fornecido. Use o comando .playb para buscar uma música.')}
+reply2('📥 Buscando informações do áudio, aguarde...');
+try {
+const apiResponse = await fetch(`https://raikken-api.speedhosting.cloud/api/play2?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
+const apiJson = await apiResponse.json();
+if (!apiJson.status || !apiJson.resultado) {
+throw new Error('Não foi possível obter os dados da música. O vídeo pode ser privado ou ter restrição de idade.');
+}
+const result = apiJson.resultado;
+const tituloMusica = result.Título;
+const linkDownloadDireto = result.Download;
+reply(`✅ Música encontrada: "${tituloMusica}"\nEnviando como documento...`);
+await subaru.sendMessage(from, {
+document: { url: linkDownloadDireto },
+mimetype: 'audio/mpeg',
+fileName: `${tituloMusica}.mp3` 
+}, { quoted: info });
+
+} catch (e) {
+console.error('Erro no comando .playdoc:', e);
+reply(`⚠️ Ocorreu um erro ao processar sua solicitação: ${e.message}`);
+}
+break;}
+
+case 'playvideo': {
+try {
+if (!q) {return reply(`❌ Use: ${prefix + command} <link do YouTube>`)}
+let url = `https://raikken-api.speedhosting.cloud/api/playvideo?url=${encodeURIComponent(q)}&qualidade=480&apikey=${RaikkenKey}`
+let { data } = await axios.get(url)
+if (!data.sucesso || !data.resultado || !data.resultado.url) {
+return reply("❌ Não foi possível obter o vídeo.")
+}
+
+let result = data.resultado
+let dataAtual = moment.tz("America/Sao_Paulo").format("DD/MM/YYYY")
+let horaAtual = moment.tz("America/Sao_Paulo").format("HH:mm:ss")
+let msgg = `
+┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
+│ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *🎬 Vídeo Encontrado!*  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Título:* ${result.titulo}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Duração:* ${result.duracao}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Data:* ${dataAtual}  
+┃࣪ ┃֪ׅ࣪ׄ᨞⁞✿𖥔࣪ *Hora:* ${horaAtual}  
+┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
+┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`
+
+await subaru.sendMessage(from, { video: { url: result.url }, caption: msgg }, { quoted: seloSz })
+} catch (e) {
+console.error(e)
+reply("❌ Erro ao processar o vídeo.")
+}
+break}
+
 case 'down':
 case 'dl':{
 try {
  const url = args[0];
+ const Raikken = "Raikken"
  if (!url) { return reply(`❓ *URL não encontrada!*
 Envie o *link* que deseja baixar. Por exemplo: ${prefix}dl https://www.tiktok.com/...
-
 ✨ *Plataformas suportadas:* ✨
 - ▶️Youtube
 - 🎵 TikTok (Vídeos e Slides)
@@ -3984,6 +4407,8 @@ mention(notcmd)
 console.error(`Erro ao processar o comando '${command}':`, error);
 await reply(`Ocorreu um erro ao executar este comando. 😟\n\n_Erro: ${error.message}_`);
 }
+} // aqui fecha o else
+
 }//CUIDADO, AQUI FECHA A FUNÇÃO !!
 
 

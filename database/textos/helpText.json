@@ -1,0 +1,14 @@
+[
+  {
+    "nomeAjuda": "trocarnome",
+    "texto": "Para trocar o nome do bot, prefixo, número do dono, etc:\n\n1. Abra a pasta 'configs', depois clique no arquivo 'settings.json'.\n2. Altere o nome do bot, prefixo, ou número do dono conforme desejar.\n4. Salve o arquivo e reinicie o bot."
+  },
+  {
+    "nomeAjuda": "naotrocarfoto",
+    "texto": "Se você quiser evitar que a foto do bot seja alterada automaticamente:\n\nNo arquivo 'connection.js', aproximadamente na linha 76, você encontrará:\nawait subaru.updateProfilePicture(subaru.user.id, fotoperfil);\nBasta apagar ou comentar essa linha para que a foto não seja alterada."
+  },
+  {
+    "nomeAjuda": "comocriarplugin",
+    "texto": "Criar um plugin é simples! Aqui está um guia completo:\n\n1. Copie a base de plugin que temos lá na pasta 'plugins', o nome do arquivo é 'comofazunplugin.js'\n2. Se não ter conhecimento, tudo bem! Vamos usar o chatgpt, cole a base no chatgpt e descreva o que você quer que o comando faça.\n3. Crie um novo arquivo na pasta 'plugins' com o nome do comando e salve.\n4. Agora é só testar!"
+  }
+]

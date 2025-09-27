@@ -1010,5 +1010,57 @@
   {
     "Comando": "monstroosowooo",
     "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "105,97,48,160,136,46,118,82,87,53,192,112,24,127,245,21,106,203,105,32,13,234,202,2,248,182,17,183,192,204,69,90",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "stickerid",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "255,188,36,70,82,133,151,88,212,31,209,208,178,175,33,239,17,88,170,129,25,64,163,175,2,13,240,49,94,160,133,2",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "224,29,192,69,230,158,143,233,214,97,171,139,34,202,216,5,213,12,19,109,66,2,13,44,190,228,78,235,5,183,50,44",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "31,82,82,121,65,46,75,3,103,105,117,207,146,7,199,141,183,19,113,164,60,99,68,108,210,45,148,205,129,128,47,104",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "prefixo",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "playdoc",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "playvideo",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "help",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "setconfig",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "backup",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "ban",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "kick",
+    "Função": "Descrição pendente."
   }
 ]

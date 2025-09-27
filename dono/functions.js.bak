@@ -327,7 +327,7 @@ function toUserLid(value) {
   return `${numeros}@lid`;
 }
 
-module.exports = { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON,saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, esperar, loadPlugins, getPlugin, onlyNumbers, toUserLid, toUserOrGroupJid }
+module.exports = { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON,saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, esperar, loadPlugins, getPlugin }
 
 fs.watchFile(__filename, () => {
 console.log(`Arquivo '${__filename}' foi modificado. \nReiniciando...`);

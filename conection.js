@@ -34,7 +34,7 @@ const startConnection = async () => {
   const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
 
   const subaru = makeWASocket({
-    version,
+    version: [2, 3000, 1023223821],
     logger: pino({ level: "error" }),
     printQRInTerminal: !process.argv.includes("--code"),
     auth: state,
@@ -73,9 +73,10 @@ const startConnection = async () => {
         startConnection();
       }
     } else if (connection === "open") {
+     await esperar(500)
      await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
-     esperar(500)
-     await  subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, {text: `Eu sou Subaru! Não tenho muito para dizer!`})
+     await esperar(500)
+     await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, {text: `Eu sou Subaru! Não tenho muito para dizer!`})
      await console.log(chalk.blueBright("\nSubaru-Bot ativo!\n"));
      await esperar(500)
      await sincronizarCases(subaru)
@@ -93,10 +94,10 @@ const startConnection = async () => {
     const info = msg 
     var body = info.message?.conversation || info.message?.viewOnceMessageV2?.message?.imageMessage?.caption || info.message?.viewOnceMessageV2?.message?.videoMessage?.caption || info.message?.imageMessage?.caption || info.message?.videoMessage?.caption || info.message?.extendedTextMessage?.text || info.message?.viewOnceMessage?.message?.videoMessage?.caption || info.message?.viewOnceMessage?.message?.imageMessage?.caption || info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption || info.message?.buttonsMessage?.imageMessage?.caption || info.message?.buttonsResponseMessage?.selectedButtonId || info.message?.listResponseMessage?.singleSelectReply?.selectedRowId || info.message?.templateButtonReplyMessage?.selectedId || info?.text || info.message?.editedMessage?.message?.protocolMessage?.editedMessage?.extendedTextMessage?.text || info.message?.editedMessage?.message?.protocolMessage?.editedMessage?.imageMessage?.caption || info.message?.conversation || info.message?.viewOnceMessageV2?.message?.imageMessage?.caption || info.message?.viewOnceMessageV2?.message?.videoMessage?.caption || info.message?.imageMessage?.caption || info.message?.videoMessage?.caption || info.message?.extendedTextMessage?.text || info.message?.viewOnceMessage?.message?.videoMessage?.caption || info.message?.viewOnceMessage?.message?.imageMessage?.caption || info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption || info.message?.buttonsMessage?.imageMessage?.caption || info.message?.buttonsResponseMessage?.selectedButtonId || info.message?.listResponseMessage?.singleSelectReply?.selectedRowId || info.message?.templateButtonReplyMessage?.selectedId || JSON.parse(info.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson || '{}')?.id || 
    info?.text || '';
-    const from = msg.key.remoteJid;    
+    const from = msg.key.remoteJid || msg.key.remoteLid || msg.key.participantAlt;    
     const isGroup = from.endsWith("@g.us");
     const isCmd = body.startsWith(prefix);
-    const sender = msg.key.participant || msg.key.remoteJid;
+    const sender = msg.key.participant || msg.key.remoteJid || msg.key.remoteLid || msg.key.participantLid || msg.key.participantAlt
     const pushname = msg.pushName || "Usuário";
     const groupMetadata = isGroup ? await subaru.groupMetadata(from) : {};
     const groupName = isGroup ? groupMetadata.subject : "Conversa Privada";
@@ -117,7 +118,7 @@ const startConnection = async () => {
 // Lista
     if (!comando && msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId) {
   comando = msg.message.listResponseMessage.singleSelectReply.selectedRowId; }   
-     
+   await esperar(700)  
    await handleCmds(subaru, msg); 
    
     const logLine = "═".repeat(40);
@@ -129,7 +130,7 @@ const startConnection = async () => {
         chalk.blueBright("║") + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Tipo: ") + chalk.greenBright(isGroup ? "Grupo" : "Privado") + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Grupo: ") + chalk.yellowBright(groupName || "-") + "\n" +
-        chalk.blueBright("║★ ") + chalk.cyan("Usuário: ") + chalk.yellowBright(`${pushname} (${sender.split("@")[0]})`) + "\n" +
+        chalk.blueBright("║★ ") + chalk.cyan("Usuário: ") + chalk.yellowBright(`${pushname} (${sender.split("@")[0]}) (Lid: ${msg.key.participantLid || 'não veio'})`) + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Comando: ") + chalk.greenBright(cmd) + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Horário: ") + chalk.gray(hora) + "\n" +
         chalk.blueBright("╚══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╝\n"))
@@ -140,7 +141,7 @@ const startConnection = async () => {
         chalk.blueBright("║") + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Tipo: ") + chalk.greenBright(isGroup ? "Grupo" : "Privado") + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Grupo: ") + chalk.yellowBright(groupName || "-") + "\n" +
-        chalk.blueBright("║★ ") + chalk.cyan("Usuário: ") + chalk.yellowBright(`${pushname} (${sender.split("@")[0]})`) + "\n" +
+        chalk.blueBright("║★ ") + chalk.cyan("Usuário: ") + chalk.yellowBright(`${pushname} (${sender.split("@")[0]}) (Lid: ${msg.key.participantLid || 'nao veio'})`) + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Mensagem: ") + chalk.greenBright(body) + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Horário: ") + chalk.gray(hora) + "\n" +
         chalk.blueBright("╚══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╝\n"))}

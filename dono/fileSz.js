@@ -78,7 +78,7 @@ const seloSz = {//Lord//GojoDevs
 "message": {
 "contactMessage": {
 "displayName": "𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞", 
-"vcard": `BEGIN:VCARD\nVERSION:3.0\nN:;SZ;;;\nFN:Chat GPT\nitem1.TEL;waid=5512997025014:5512997025014\nitem1.X-ABLabel:Celular\nEND:VCARD`, 
+"vcard": `BEGIN:VCARD\nVERSION:3.0\nN:;SZ;;;\nFN:Chat GPT\nitem1.TEL;waid=559292678251:559292678251\nitem1.X-ABLabel:Celular\nEND:VCARD`, 
 "contextInfo": {
 "forwardingScore": 1000,
 "isForwarded": true
