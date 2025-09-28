@@ -14,13 +14,13 @@ const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, cheerio, mome
 
 const { getPlugin, loadPlugins } = require("./dono/functions.js");
 
-const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken, idCanal, botNumber, donoLid, baseRaikkenTinder } = require('./configs/settings.json');
+const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken, idCanal, botNumber, donoLid, botLid, baseRaikkenTinder } = require('./configs/settings.json');
 
 const { menumembros, menuAdm, menubn, menudono, menugeral } = require('./configs/menus.js')
 
 const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON, saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, onlyNumbers, toUserLid, toUserOrGroupJid } = require('./dono/functions.js')
 
-const { selogpt,seloCriador, seloGpt,seloMeta,seloLuzia,seloLaura,seloCopilot,seloNubank,seloBb,seloBradesco, seloSantander,seloItau, selodoc, pay, seloSz,seloface,seloluzia } = require("./dono/fileSz.js")
+const { selogpt, seloCriador, seloGpt, seloMeta, seloLuzia , seloLaura,seloCopilot, seloNubank, seloBb,seloBradesco, seloSantander, seloItau, selodoc, pay, seloSz, seloface, seloluzia, seloloc } = require("./dono/fileSz.js")
 
 const selo = seloSz
 
@@ -53,6 +53,7 @@ const sz = q
 const from = msg.key.remoteJid || msg.key.remoteLid || msg.key.remoteLid
 const isGroup = from.endsWith('@g.us');
 const sender = msg.key.participant || msg.key.remoteJid || msg.key.remoteLid || msg.key.participantLid || msg.key.participantAlt
+//const senderLid = info.key?.participantLid || info.message?.extendedTextMessage?.contextInfo?.participantLid || info.key.remoteLid || info.key?.participant || "";
 const userJid = info?.key?.participant?.replace(/:[0-9][0-9]|:[0-9]/g, "");
 const type = msg.type
 const isJsonIncludes = (json, value) => {
@@ -66,6 +67,7 @@ const menc_os2 = q.includes("@") ? menc_jid : menc_prt;
 const usuariosMencionados = info?.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
 const usuarioRespondido = info?.message?.extendedTextMessage?.contextInfo?.participant || null;
 const alvo = usuariosMencionados.length > 0 ? usuariosMencionados[0] : usuarioRespondido;
+const botLid2 = botLid || subaru.user?.lid.split(':')[0] + "@lid" ||  "não catou";
 const baileysIs = (message, type) => !!(message.message?.[type] || message[type]);
 const isImage = baileysIs(info, "imageMessage");
 const isVideo = baileysIs(info, "videoMessage");
@@ -111,17 +113,22 @@ const groupMetadata = isGroup ? await subaru.groupMetadata(from): ""
 const participants = isGroup ? await groupMetadata.participants : ''
 const groupName = isGroup? groupMetadata.subject: ""
 const groupDesc = isGroup ? groupMetadata.desc : ''
-const groupMembers = isGroup ? groupMetadata.participants : ''
+const groupMembers = isGroup ? groupMetadata.participants : []
 const groupAdmins = isGroup ? getGroupAdmins(groupMembers) : ''
+const senderObject = groupMembers.find(member => member.jid === sender);
+let senderLid = null
+if (senderObject) {
+senderLid = senderObject.lid; }
 const isCmd = content.startsWith(prefix)
 const cmd = isCmd ? content.slice(1).trim().split(/ +/).shift().toLocaleLowerCase() : null
 const comando = cmd;
 const pushname = info.pushName ? info.pushName : ""
 const numeroBot = subaru.user.id.split(":")[0]+"@s.whatsapp.net"
 const isDono = sender.includes(donoNmr) || sender === donoLid
-const isGroupAdmins = groupAdmins.includes(sender) || false || isDono
+//const isGroupAdmins = groupAdmins.includes(sender) || false || isDono
 const isAdm = groupAdmins.includes(sender) || false || isDono
-const isBotGroupAdmins = groupAdmins.includes(numeroBot) || false
+const isBotGroupAdmins = groupAdmins.includes(botLid2) || groupAdmins.includes(numeroBot) || false;
+const isGroupAdmins = groupAdmins.includes(sender) || groupAdmins.includes(senderLid) || isDono || false;
 const participantes = isGroup ? groupMetadata.participants.map(usuario => usuario.id) : ''
 const mencionados = isGroup ? participantes.sort(() => 0.5 - Math.random()).slice(0, 5) : '' 
 var budy = info?.message?.conversation || info?.message?.extendedTextMessage?.text || '';
@@ -171,7 +178,25 @@ fs.unlinkSync(file);
 } catch (error) {}
 }
 
-// Envia uma mensagem de texto simples.
+// Envia uma mensagem de texto, mas com um quoted de loc.
+const enviarBan = (texto) => {
+const selob = {
+"key": {
+"fromMe": false,
+"participant":
+"0@s.whatsapp.net",
+"remoteJid": null},
+message: {liveLocationMessage: 
+{degreesLatitude: 173.282, 
+degreesLongitude: -19.378,
+sequenceNumber: "1657237469254001", 
+thumbnail: null, 
+caption: `*🚫𝐃𝐄𝐒𝐂𝐔𝐌𝐏𝐑𝐈𝐌𝐄𝐍𝐓𝐎 𝐃𝐀𝐒 𝐑𝐄𝐆𝐑𝐀𝐒!🚫*`}}}
+
+subaru.sendMessage(from, { text: texto }, { quoted: selob })
+}
+
+//enviar mensagem de texto simples. 
 const enviar = (texto) => {
 subaru.sendMessage(from, { text: texto }, { quoted: info })}
 
@@ -459,9 +484,9 @@ const isAntiImg = isGroup ? ArquivosDosGrupos?.[0]?.antiimg : undefined
 const isAntiVid = isGroup ? ArquivosDosGrupos?.[0]?.antivideo : undefined
 const isAntiAudio = isGroup ? ArquivosDosGrupos?.[0]?.antiaudio : undefined
 const isAntiSticker = isGroup ? ArquivosDosGrupos?.[0]?.antisticker : undefined
-const Antidoc = isGroup ? ArquivosDosGrupos?.[0]?.antidoc : undefined
+const isAntiDoc = isGroup ? ArquivosDosGrupos?.[0]?.antidoc : undefined
 const isAntiCtt = isGroup ? ArquivosDosGrupos?.[0]?.antictt : undefined
-const Antiloc = isGroup ? ArquivosDosGrupos[0].antiloc : undefined
+const isAntiLoc = isGroup ? ArquivosDosGrupos[0].antiloc : undefined
 const isBanchat = isGroup ? ArquivosDosGrupos?.[0].banchat : undefined
 const isSimih = isGroup ? ArquivosDosGrupos?.[0].simih : undefined
 const isModobn = isGroup ? ArquivosDosGrupos?.[0].modobn : undefined
@@ -714,8 +739,8 @@ if (!checkPrefix(body, prefix)) {
  if(!isGroup) return reply(mss.grupo)
  if(!isGroupAdmins) return reply(mss.adm)
  if(!isBotGroupAdmins) return reply(mss.botadm)
- if(!menc_prt) return reply2("Marque a mensagem.")
- await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.message.extendedTextMessage.contextInfo.stanzaId, participant: menc_prt}})
+ if(!alvo) return reply2("Marque a mensagem.")
+ await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.message.extendedTextMessage.contextInfo.stanzaId, participant: alvo}})
  await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender}})
  await react("🗑")
  break;}
@@ -895,73 +920,84 @@ console.error(err);
 }
 }}
 
-//=====( ABAIXO AS FUNÇÕES DOS ANTIS)=====\\
+//=====( ABAIXO AS FUNÇÕES DOS ANTIS )=====\\
 //Antilink
 if (isAntiLink) {
+try {
 const UrlLinks = ["https://", "wa.me", "http://"];
 for (let link of UrlLinks) {
-if (content.includes(link)) {
-enviar(`Links não são permitidos aqui, toma um ban sinistro kkk`);
-await subaru.sendMessage(from, {delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender }});
-await subaru.groupParticipantsUpdate(from, [sender], "remove");}}}
+if (body.includes(link)) {
+if(info.key.fromMe) {return;}
+if(isGroupAdmins) {return;} 
+enviarBan(`*Links não são permitidos aqui!*`);
+await subaru.sendMessage(from, {delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender || senderLid }});
+await subaru.groupParticipantsUpdate(from, [sender || senderLid], "remove");}}
+} catch (e) {
+console.log(e)
+}}
 //ANTI-IMAGEM
-if(isAntiImg && isBotGroupAdmins && type == 'imageMessage') {
-if(info.key.fromMe) return
-if(isGroupAdmins) return subaru.sendMessage(from, {text:'O ban já ia cantar kkkkk cê deu sorte que é admin 🤪'}, {quoted: seloSz})
-if(ArquivosDosGrupos[0].legenda_imagem != "0") {
-subaru.sendMessage(from, {text: ArquivosDosGrupos[0].legenda_imagem}, {quoted: seloSz})
-}
-setTimeout(() => {
-subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender}})
-}, 1500)
-if(!JSON.stringify(groupMembers).includes(sender)) return
-subaru.groupParticipantsUpdate(from, [sender], 'remove')}
+if(isAntiImg && isBotGroupAdmins && isImage) {
+console.log("imagem")
+if(info.key.fromMe) {return;}
+if(isGroupAdmins) {return;} 
+await enviarBan(`*Imagens não são permitidos aqui!*`);
+await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender || senderLid}})
+if(!JSON.stringify(groupMembers).includes(sender || senderLid)) return
+await subaru.groupParticipantsUpdate(from, [sender || senderLid], 'remove')}
+//ANTI-CONTATO
+if(isAntiCtt && isBotGroupAdmins && isContact) {
+if(info.key.fromMe) {return;}
+if(isGroupAdmins) {return;} 
+await enviarBan(`*Contatos não são permitidos aqui!*`);
+await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender || senderLid}})
+if(!JSON.stringify(groupMembers).includes(sender || senderLid)) return
+await subaru.groupParticipantsUpdate(from, [sender || senderLid], 'remove')}
 //ANTI-STICKER
-if(isAntiSticker && isBotGroupAdmins && type == 'stickerMessage') {
-if(info.key.fromMe) return
-if(isGroupAdmins) return subaru.sendMessage(from, {text:'O ban já ia cantar kkkkk cê deu sorte que é admin 🤪'}, {quoted: seloSz})
-subaru.sendMessage(from, {text: '*mensagem proibida detectada, banindo...*'}, {quoted: seloSz})
-setTimeout(() => {
-subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender}})
-}, 1500)
-if(!JSON.stringify(groupMembers).includes(sender)) return
-subaru.groupParticipantsUpdate(from, [sender], 'remove')}
-if(Antidoc && isBotGroupAdmins && type == 'documentMessage') {
-if(info.key.fromMe) return
-if(isGroupAdmins) return subaru.sendMessage(from, {text:'O ban já ia cantar kkkkk cê deu sorte que é admin 🤪'}, {quoted: seloSz})
-if(ArquivosDosGrupos[0].legenda_documento != "0") {
-subaru.sendMessage(from, {text: ArquivosDosGrupos[0].legenda_documento}, {quoted: seloSz}) }
-setTimeout(() => {
-subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender}})
-}, 1500)
-if(!JSON.stringify(groupMembers).includes(sender)) return
-subaru.groupParticipantsUpdate(from, [sender], 'remove')}
-let isTrueFalse = Array("play", "play2", "play3", "play4", "play5", "spotify", "playlist", "ytsearch", "ytmp4", "ytmp4-2", "ytmp3", "ytmp3-2", "tiktok", "tiktok2", "tiktokimg", "instamp3", "facebook", "facebook2", "twitter").some(item => item === comando)
+if(isAntiSticker && isBotGroupAdmins && isSticker) {
+console.log("sticker")
+if(info.key.fromMe) {return;}
+if(isGroupAdmins) {return;} 
+await enviarBan(`*Figurinhas não são permitidos aqui!*`);
+await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender || senderLid}})
+if(!JSON.stringify(groupMembers).includes(sender || senderLid)) return
+await subaru.groupParticipantsUpdate(from, [sender || senderLid], 'remove') }
+//ANTI-LOCALIZAÇÃO
+if(isAntiLoc && isBotGroupAdmins && isLocation) {
+console.log("sticker")
+if(info.key.fromMe) {return;}
+if(isGroupAdmins) {return;}
+await enviarBan(`*Localização não são permitidos aqui!*`);
+await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender || senderLid}})
+if(!JSON.stringify(groupMembers).includes(sender || senderLid)) return
+await subaru.groupParticipantsUpdate(from, [sender || senderLid], 'remove') }
+//ANTIDOC
+if(isAntiDoc && isBotGroupAdmins && isDocument) {
+console.log("doc")
+if(info.key.fromMe) {return;}
+if(isGroupAdmins) {return;} 
+await enviarBan(`*Documentos não são permitidos aqui!*`);
+await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender || senderLid}})
+if(!JSON.stringify(groupMembers).includes(sender || senderLid)) return
+await subaru.groupParticipantsUpdate(from, [sender || senderLid], 'remove')
+let isTrueFalse = Array("play", "play2", "play3", "play4", "play5", "spotify", "playlist", "ytsearch", "ytmp4", "ytmp4-2", "ytmp3", "ytmp3-2", "tiktok", "tiktok2", "tiktokimg", "instamp3", "facebook", "facebook2", "twitter").some(item => item === comando)}
 //ANTI-VIDEO
-if(isAntiVid && isBotGroupAdmins && type == 'videoMessage') {
-if(isGroupAdmins) return subaru.sendMessage(from,{text:'O ban já ia cantar kkkkk cê deu sorte que é admin 🤪'}, {quoted: seloSz})
-if(ArquivosDosGrupos[0].legenda_video == "0") {
-subaru.sendMessage(from, {text: '*mensagem proibida detectada, banindo...*'}, {quoted: seloSz})
-} else {
-subaru.sendMessage(from, {text: ArquivosDosGrupos[0].legenda_video}, {quoted: seloSz})
-}
-setTimeout(() => {
-subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender}})
-}, 1500)
-if(!JSON.stringify(groupMembers).includes(sender)) return
-subaru.groupParticipantsUpdate(from, [sender], 'remove')}
+if(isAntiVid && isBotGroupAdmins && isVideo) {
+console.log("vídeo")
+if(isGroupAdmins) {return;}
+await enviarBan(`*Vídeos não são permitidos aqui!*`);
+await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender}})
+if(!JSON.stringify(groupMembers).includes(sender || senderLid)) return
+await subaru.groupParticipantsUpdate(from, [sender || senderLid], 'remove') }
 //ANTI-AUDIO
-if(isAntiAudio && isBotGroupAdmins && type == 'audioMessage') {
-if(isGroupAdmins) return subaru.sendMessage(from, {text:'O ban já ia cantar kkkkk cê deu sorte que é admin 🤪'}, {quoted: seloSz})
-subaru.sendMessage(from, {text: '*mensagem proibida detectada, banindo...*'}, {quoted: seloSz})
-setTimeout(() => {
-subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.id, participant: sender}})
-}, 1500)
-if(!JSON.stringify(groupMembers).includes(sender)) return
-subaru.groupParticipantsUpdate(from, [sender], 'remove')}
+if(isAntiAudio && isBotGroupAdmins && isAudio) {
+console.log("áudio")
+if(isGroupAdmins) {return;} 
+await enviarBan(`*Áudios não são permitidos aqui!*`);
+await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.key.id, participant: sender || senderLid}})
+if(!JSON.stringify(groupMembers).includes(sender || senderLid)) return
+await subaru.groupParticipantsUpdate(from, [sender || senderLid], 'remove') }
 
-return
-}
+}// AQUI FECHA OS COMANDOS SEM PREFIXO.
 
 
 //=====( ABAIXO OS COMANDOS COM PREFIXO )=====\\ 
@@ -988,7 +1024,7 @@ await plugin.run({ subaru, msg, args, from, sender, isGroup, pushname, reply, se
 console.error(`❌ Erro no plugin ${cmd}:`, e);
 }
 //=====( ABAIXO OS COMANDOS POR CASE )=====\\ 
-} else {   
+} else {
 try {
 switch (command) {
 
@@ -999,8 +1035,8 @@ await subaru.sendMessage(from, { text: `🔎 Debug do seu LID:\n
 > - remoteJid: ${msg.key.remoteJid || 'não veio'}
 > - remoteLid: ${msg.key.remoteLid || 'não veio'}
 > - participant: ${msg.key.participant || 'não veio'}
-> - participantAlt: ${msg.key.participantAlt || 'não veio'}
-> - participantLid: ${msg.key.participantLid || 'não veio'}`});
+> - participantLid: ${msg.key.participantLid || 'não veio'}
+> - senderLid: ${senderLid || "não veio"}`});
 }
 break;
 
@@ -1075,7 +1111,7 @@ await react("♥️");
 const moment = require('moment-timezone');
 const data = moment().tz('America/Sao_Paulo').format('DD/MM/YYYY');
 const hora = moment().tz('America/Sao_Paulo').format('HH:mm:ss');
-const userToCheck = menc_jid2?.length ? menc_jid2[0] : menc_prt || userJid;
+const userToCheck = menc_jid2?.length ? menc_jid2[0] : alvo || userJid;
 const formatarTempo = (segundos) => {
 const h = Math.floor(segundos / 3600).toString().padStart(2, '0');
 const m = Math.floor((segundos % 3600) / 60).toString().padStart(2, '0');
@@ -1269,6 +1305,11 @@ return reply(`Marque uma foto ou o vídeo(menor que 10s) para fazer sua figurinh
 }
 break
 
+case 'get': 
+if(!isGroupAdmins && !isDono) return enviar(mss.adm)
+reply2(JSON.stringify(info.message.extendedTextMessage.contextInfo, null, 3))
+break
+
 case 'sair':
 if(!isGroup) return reply(mss.grupo)
 if(!isBotGroupAdmins) return reply(mss.botadm)
@@ -1414,7 +1455,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer botar rebolar pros cria, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer botar rebolar pros cria, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/d46ff5e2b8f4c5335e362.mp4`}, gifPlayback: true, caption: `Você acabou de comer a(o) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1423,7 +1464,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer botar pra capinar um lote, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer botar pra capinar um lote, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/4682c1b474ce5dee3a48d.mp4`}, gifPlayback: true, caption: `Você acabou de botar o(a) *@${menc_os2.split('@')[0]}* pra capinar um lote`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1432,7 +1473,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer pegar nos peitinhos, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer pegar nos peitinhos, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/52d46e2c58318b8cfcacc.mp4`}, gifPlayback: true, caption: `Você acabou de pegar nos peitos do(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1442,7 +1483,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer pegar no pau dele(a), a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer pegar no pau dele(a), a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/5073ba8be6b099ed812a7.mp4`}, gifPlayback: true, caption: `Você acabou de pegar no pau do(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1452,7 +1493,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que desejas ser acariciado, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que desejas ser acariciado, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/e62de1e6863c59d284b2e.mp4`}, gifPlayback: true, caption: `Você acabou de pegar na bunda do(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1461,7 +1502,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer dar uma mordida, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer dar uma mordida, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/75e4c0273be625a2363ce.mp4`}, gifPlayback: true, caption: `Você acabou de dar uma mordida no(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1470,7 +1511,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer dar uma sentadinha, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer dar uma sentadinha, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/d695e05443043ff9a254d.mp4`}, gifPlayback: true, caption: `Você acabou de dar uma sentadinha no(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1479,7 +1520,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer tirar a foto, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer tirar a foto, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/7193308e3949803132bad.mp4`}, gifPlayback: true, caption: `Você acabou de tirar uma foto do(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1488,7 +1529,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque a pessoa que você quer comer a força, a mensagem ou o @');
+if(!alvo) return reply('Marque a pessoa que você quer comer a força, a mensagem ou o @');
 await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/kusu1d.mp4`}, gifPlayback: true, caption: `Ta prr 🔥 *@${menc_os2.split('@')[0]}* Você foi estuprado 😰` , mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1497,7 +1538,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque a pessoa que você quer botar pra mamar, a mensagem ou o @');
+if(!alvo) return reply('Marque a pessoa que você quer botar pra mamar, a mensagem ou o @');
 await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/4hvf79.mp4`}, gifPlayback: true, caption: `Eita *@${menc_os2.split('@')[0]}* garganta profunda voce tem 😰` , mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1506,7 +1547,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque a pessoa que você quer botar pra cagar, a mensagem ou o @');
+if(!alvo) return reply('Marque a pessoa que você quer botar pra cagar, a mensagem ou o @');
 await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/662vzj.mp4`}, gifPlayback: true, caption: `CARALHOOOOO *@${menc_os2.split('@')[0]}* FAMOSO CAGA TRONCO KAKAKAKAK??? 🤯😳` , mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1529,7 +1570,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer dar um abraço, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer dar um abraço, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://files.catbox.moe/ecw188.mp4`}, gifPlayback: true, caption: `Você acabou de dar um abraço fofo no(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1538,7 +1579,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer botar pra lavar a louça, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer botar pra lavar a louça, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://files.catbox.moe/qptf5k.mp4`}, gifPlayback: true, caption: `Você acabou de botar a(o) *@${menc_os2.split('@')[0]}* pra lavar a louça`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1547,7 +1588,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer dar um carinho, a mensagem ou o @.')
+if(!alvo) return reply('Marque o alvo que você quer dar um carinho, a mensagem ou o @.')
 await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/2b6b4f4e38214bd6164ce.mp4`}, gifPlayback: true, caption: `Você acabou de dar um carinho no(a) *@${menc_os2.split('@')[0]}*`, mentions: [menc_os2]}, {quoted: selo})
 break
 
@@ -1745,7 +1786,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 ;
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o alvo que você quer da um chute, a mensagem ou o @')
+if(!alvo) return reply('Marque o alvo que você quer da um chute, a mensagem ou o @')
 await subaru.sendMessage(from, {video: {url: chutecmd}, gifPlayback: true, caption: `Você acabou de dar um chute em *@${menc_os2.split('@')[0]}*.`, mentions: [menc_os2]}, {quoted: selo})
 break 
 
@@ -1754,7 +1795,7 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-if(!menc_os2 || menc_jid2[1]) return reply('Marque a mensagem com o comando ou marque o @ do usuário..')
+if(!alvo) return reply('Marque a mensagem com o comando ou marque o @ do usuário..')
 randomF = ["𝐄𝐌 𝐈𝐋𝐔𝐃𝐈𝐑 𝐏𝐄𝐒𝐒𝐎𝐀𝐒", "𝐄𝐌 𝐅𝐄𝐑𝐈𝐑 𝐎𝐒 𝐒𝐄𝐍𝐓𝐈𝐌𝐄𝐍𝐓𝐎𝐒", "𝐄𝐌 𝐃𝐀𝐑 𝐂𝐇𝐈𝐅𝐑𝐄"]
 await subaru.sendMessage(from, {text: `𝐎(𝐀) *@${menc_os2.split("@")[0]}* 𝐄 𝐄𝐒𝐏𝐄𝐂𝐈𝐀𝐋𝐈𝐒𝐓𝐀: ${randomF[Math.floor(Math.random() * randomF.length)]}.`, mentions: [menc_os2]}, {quoted: selo})
 break
@@ -1793,7 +1834,7 @@ reagir("😈")
 const gozars = ['Você acabou de gozar na boca do(a)','Você acabou de gozar no cuzinho do(a)','Você acabou de gozar na bucetinha do(a)', 'Você acabou de gozar no pé do(a)', 'Você acabou de gozar na cabeça do(a)', 'Você acabou de gozar na cara do(a)', 'Você acabou de gozar na barriga do(a)', 'Você acabou de gozar no olho do(a)', 'Você acabou de gozar na útero do(a)', 'Você acabou de gozar no cabelo do(a)', 'Você acabou de gozar na boca do(a)', 'Você acabou de gozar no umbigo do(a)', 'Você acabou de gozar nas costas do(a)', 'Você acabou de gozar nos braços do(a)', 'Você acabou de gozar na mão do(a)',] 
 const gozacao = gozars[Math.floor(Math.random() * gozars.length)];
 if(!isGroup) return reply('*sᴏᴍᴇɴᴛᴇ ᴇᴍ ɢʀᴜᴘᴏs 🙇‍♂️*')//tzn modalidades esportivas
-if(!menc_os2 || menc_jid2[1]) return reply('*ᴍᴀʀǫᴜᴇ ᴀ ᴘᴇssᴏᴀ ǫᴜᴇ ᴠᴏᴄᴇ ǫᴜᴇʀ ɢᴏᴢᴀʀ 🙈*')
+if(!alvo) return reply('*ᴍᴀʀǫᴜᴇ ᴀ ᴘᴇssᴏᴀ ǫᴜᴇ ᴠᴏᴄᴇ ǫᴜᴇʀ ɢᴏᴢᴀʀ 🙈*')
 subaru.sendMessage(from, {video: {url: `https://telegra.ph/file/8a82de1e9da332773f52c.mp4`}, gifPlayback: true, caption: `${gozacao} @${menc_os2.split('@')[0]} 🥵
 `, mentions: [menc_os2]}, {quoted: selo})
 break
@@ -2322,8 +2363,6 @@ const settingsMap = [
 "donoName",
 "donoNmr",
 "donoLid",
-"baseRaikken",
-"RaikkenKey",
 "idCanal"
 ]
 
@@ -2801,6 +2840,59 @@ break
 
 
 //=====( ABAIXO OS COMANDOS DE ADM )=====\\
+case 'ativar': {
+if (!isGroup) return reply(mss.grupo);
+if (!isGroupAdmins) return reply(mss.adm);
+if (!isBotGroupAdmins) return reply(mss.botadm);
+await react("⚙️");
+const funcoes = [
+{ nome: "Boas-Vindas", status: isBemVindo, id: `${prefix}bemvindo` },
+{ nome: "Anti-Link", status: isAntiLink, id: `${prefix}antilink` },
+{ nome: "Anti-Imagem", status: isAntiImg, id: `${prefix}antiimg` },
+{ nome: "Anti-Vídeo", status: isAntiVid, id: `${prefix}antivideo` },
+{ nome: "Anti-Áudio", status: isAntiAudio, id: `${prefix}antiaudio` },
+{ nome: "Anti-Figurinha", status: isAntiSticker, id: `${prefix}antisticker` },
+{ nome: "Anti-Documento", status: isAntiDoc, id: `${prefix}antidoc` },
+{ nome: "Anti-Contato", status: isAntiCtt, id: `${prefix}antictt` },
+{ nome: "Anti-Localização", status: isAntiLoc, id: `${prefix}antiloc` },
+{ nome: "Modo Brincadeiras", status: isModobn, id: `${prefix}modobn` },
+{ nome: "Simsimi (IA)", status: isSimih, id: `${prefix}simih` }
+];
+
+const rows = funcoes.map(func => ({
+title: `${func.nome}: ${func.status ? '✅ Ativado' : '❌ Desativado'}`,
+description: `Use ${func.id} 1 (ativar) ou 0 (desativar)`,
+id: `${func.id} ${func.status ? '0' : '1'}` 
+}));
+await subaru.relayMessage(from, {
+interactiveMessage: {
+header: proto.Message.InteractiveMessage.Header.create({
+title: `⚙️ PAINEL DE CONTROLE - ${groupName}`,
+hasMediaAttachment: false
+}),
+body: {
+text: `Olá ${pushname}! 👋\n\nAqui você pode ativar ou desativar as funções do bot para este grupo. Clique em uma opção para alternar o estado dela (ativar/desativar).`
+},
+footer: { text: `© ${botName}` },
+nativeFlowMessage: {
+buttons: [{
+name: "single_select",
+buttonParamsJson: JSON.stringify({
+title: "🔧 FUNÇÕES DO GRUPO",
+sections: [{
+title: "Clique para ativar ou desativar",
+rows: rows
+}]
+})
+}],
+messageParamsJson: ""
+}
+}
+}, {});
+break;
+}
+
+
 case 'ban': {
 if (!isGroup) return reply(mss.grupo);
 if (!isGroupAdmins) return reply(mss.adm);
@@ -2868,7 +2960,7 @@ if(!isGroupAdmins) return reply(mss.adm)
 if(!isBotGroupAdmins) return reply(mss.botadm)
 if(groupIdscount.indexOf(from) < 0) return reply('O bot não tem ainda dados sobre o grupo')
 var ind = groupIdscount.indexOf(from)
-if(!menc_os2 || menc_jid2[1]) return reply('Marque o @ de quem deseja puxar a atividade / Só pode um por vez..')
+if(!alvo) return reply('Marque o @ de quem deseja puxar a atividade / Só pode um por vez..')
 if(numbersIds.indexOf(menc_os2) >= 0) {
 var indnum = numbersIds.indexOf(menc_os2)
 var RSM_CN = countMessage[ind].numbers[indnum]
@@ -3099,12 +3191,12 @@ if(!isGroupAdmins) return reply(mss.adm)
 if(!isBotGroupAdmins) return reply(mss.botadm)
 if(args.length < 1) return reply(`Use 1 pra ativar ou 0 pra desativar. Caso deseja ativar, use essa forma: ${prefix+comando} 1, caso seja desativar e só trocar o 1 pelo 0.`)
 if(Number(args[0]) === 1) {
-if(Antidoc) return reply('O recurso de anti documento já está ativado.')
+if(isAntiDoc) return reply('O recurso de anti documento já está ativado.')
 ArquivosDosGrupos[0].antidoc = true
 setGp(ArquivosDosGrupos)
 reply('Ativou com sucesso o recurso de anti documento neste grupo.')
 } else if(Number(args[0]) === 0) {
-if(!Antidoc) return reply('O recurso de anti documento já está desativado.')
+if(!isAntiDoc) return reply('O recurso de anti documento já está desativado.')
 ArquivosDosGrupos[0].antidoc = false
 setGp(ArquivosDosGrupos)
 reply('Desativou com sucesso o recurso de anti documento neste grupo.')
@@ -3141,12 +3233,12 @@ if(!isGroupAdmins) return reply(mss.adm)
 if(!isBotGroupAdmins) return reply(mss.botadm)					
 if(args.length < 1) return reply(`Use 1 pra ativar ou 0 pra desativar. Caso deseja ativar, use essa forma: ${prefix+comando} 1, caso seja desativar e só trocar o 1 pelo 0.`)
 if(Number(args[0]) === 1) {
-if(Antiloc) return reply('O recurso de anti loc já está ativado.')
+if(isAntiLoc) return reply('O recurso de anti loc já está ativado.')
 ArquivosDosGrupos[0].antiloc = true
 setGp(ArquivosDosGrupos)
 reply('Ativou com sucesso o recurso de anti loc neste grupo.')
 } else if(Number(args[0]) === 0) {
-if(!Antiloc) return reply('O recurso de anti loc já está desativado.')
+if(!isAntiLoc) return reply('O recurso de anti loc já está desativado.')
 ArquivosDosGrupos[0].antiloc = false
 setGp(ArquivosDosGrupos)
 reply('Desativou com sucesso o recurso de anti loc neste grupo.')
@@ -3283,28 +3375,28 @@ case 'deletar': case 'del':case 'd': case 'apagar':
 if(!isGroup) return reply(mss.grupo)
 if(!isGroupAdmins) return reply(mss.adm)
 if(!isBotGroupAdmins) return reply(mss.botadm)
-if(!menc_prt) return enviar("Marque a mensagem.")
-await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.message.extendedTextMessage.contextInfo.stanzaId, participant: menc_prt}})
+if(!alvo) return enviar("Marque a mensagem.")
+await subaru.sendMessage(from, { delete: { remoteJid: from, fromMe: false, id: info.message.extendedTextMessage.contextInfo.stanzaId, participant: alvo}})
 react("🗑")
 break
 
 case 'promover': 
 if(!isGroup) return reply(mss.grupo)
-if(!menc_os2 || menc_jid2[1]) return enviar("Marque a mensagem do usuário ou marque o @ dele.., lembre de só marcar um usuário...")
-let promoveJid = menc_os2 || menc_jid2;
-if(!JSON.stringify(groupMembers).includes(menc_os2)) return enviar("Esse membro não está mais no grupo.")
-if(numeroBot.includes(menc_os2)) return enviar('Ué? Tá pedindo pra eu me promover?!')
+if(!alvo) return enviar("Marque a mensagem do usuário ou marque o @ dele.., lembre de só marcar um usuário...")
+let promoveJid = alvo;
+if(!JSON.stringify(groupMembers).includes(alvo)) return enviar("Esse membro não está mais no grupo.")
+if(numeroBot.includes(alvo)) return enviar('Ué? Tá pedindo pra eu me promover?!')
  subaru.sendMessage(from, {text: `@${promoveJid.split("@")[0]} Foi promovido(a) para [ ADMINISTRADOR ] com sucesso.`, mentions: [promoveJid]})
  subaru.groupParticipantsUpdate(from, [promoveJid], "promote")
 break
 
 case 'rebaixar': 
 if(!isGroup) return reply(msss.grupo)
-if(!menc_os2 || menc_jid2[1]) return enviar("Marque a mensagem do usuário ou marque o @ dele.., lembre de só marcar um usuário...")
-let rebaixarJid = menc_os2 || menc_jid2;
-if(!JSON.stringify(groupMembers).includes(menc_os2)) return enviar("Esse membro não está mais no grupo.")
-if(numeroBot.includes(menc_os2)) return enviar('E você acha que eu vou me rebaixar?')
-if(donoNmr.includes(menc_os2)) return enviar('*Não vou rebaixar meu criador.*')
+if(!alvo) return enviar("Marque a mensagem do usuário ou marque o @ dele.., lembre de só marcar um usuário...")
+let rebaixarJid = alvo;
+if(!JSON.stringify(groupMembers).includes(alvo)) return enviar("Esse membro não está mais no grupo.")
+if(numeroBot.includes(alvo)) return enviar('E você acha que eu vou me rebaixar?')
+if(donoNmr.includes(alvo)) return enviar('*Não vou rebaixar meu criador.*')
 subaru.sendMessage(from, {text: `@${rebaixarJid.split("@")[0]} Foi rebaixado para [ MEMBRO COMUM ] com sucesso.`, mentions: [rebaixarJid]})
 subaru.groupParticipantsUpdate(from, [rebaixarJid], "demote")
 break
@@ -3512,7 +3604,8 @@ try {
 let result;
 let data = moment().tz('America/Sao_Paulo').format('DD/MM/YYYY');
 let hora = moment().tz('America/Sao_Paulo').format('HH:mm:ss');
-if (/https?:\/\/(www\.)?youtube\.com\/|youtu\.be\//.test(q)) {
+if (/https?:\/\/(www\.)?youtube\.com\/|youtu\.be\//.test(q)) 
+{
 let res = await fetch(`https://raikken-api.speedhosting.cloud/api/play2?url=${encodeURIComponent(q)}&apikey=${RaikkenKey}`);
 let json = await res.json();
 if (!json.status) return reply('Não foi possível processar o link.');
@@ -4158,8 +4251,12 @@ reply(detectTinder(errorMessage));
 }
 break
 
-case 'testeParaOTesteMonstro':
-react("🤩");
+case 'teste':
+try {
+await subaru.sendMessage(from, { text: "Hello World", ai: true });
+} catch (e) {
+console.log(e)
+}
 break
 
 case 'sairtinder':
@@ -4417,4 +4514,4 @@ module.exports = { handleCmds };
 fs.watchFile(__filename, () => {
 console.log(`Arquivo '${__filename}' foi modificado. Reiniciando...`);
 process.exit();
-});
+}); 

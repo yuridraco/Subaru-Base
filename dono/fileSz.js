@@ -117,5 +117,18 @@ const seloface = {
   "forwardingScore": 1, 
   "isForwarded": true  
   }}}};
+  
+  const seloloc = {
+  "key": 
+  {"fromMe": false,
+    "participant":
+    "0@s.whatsapp.net",
+    "remoteJid": 'status@broadcast'},
+    message: {liveLocationMessage: 
+      {degreesLatitude: 173.282, 
+        degreesLongitude: -19.378,
+        sequenceNumber: "1657237469254001", 
+        thumbnail: null, 
+        caption: `Bem vindo`}}}
 
-module.exports = {  selogpt,  seloCriador, seloGpt,  seloMeta,  seloLuzia,  seloLaura,  seloCopilot,  seloNubank,  seloBb,  seloBradesco, seloSantander,  seloItau, selodoc, pay, seloSz,  seloface,  seloluzia};
+module.exports = {  selogpt,  seloCriador, seloGpt,  seloMeta,  seloLuzia,  seloLaura,  seloCopilot,  seloNubank,  seloBb,  seloBradesco, seloSantander,  seloItau, selodoc, pay, seloSz,  seloface,  seloluzia, seloloc};

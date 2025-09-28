@@ -1062,5 +1062,17 @@
   {
     "Comando": "kick",
     "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "ativar",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "get",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "teste",
+    "Função": "Descrição pendente."
   }
 ]

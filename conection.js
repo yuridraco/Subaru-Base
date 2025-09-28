@@ -101,6 +101,11 @@ const startConnection = async () => {
     const pushname = msg.pushName || "Usuário";
     const groupMetadata = isGroup ? await subaru.groupMetadata(from) : {};
     const groupName = isGroup ? groupMetadata.subject : "Conversa Privada";
+    const groupMembers = isGroup ? groupMetadata.participants : []
+    const senderObject = groupMembers.find(member => member.jid === sender);
+    let senderLid = null
+    if (senderObject) {
+    senderLid = senderObject.lid; }
     const cmd = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : null;
     const hora = new Date().toLocaleTimeString("pt-BR");
     let comando = cmd         
@@ -130,7 +135,7 @@ const startConnection = async () => {
         chalk.blueBright("║") + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Tipo: ") + chalk.greenBright(isGroup ? "Grupo" : "Privado") + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Grupo: ") + chalk.yellowBright(groupName || "-") + "\n" +
-        chalk.blueBright("║★ ") + chalk.cyan("Usuário: ") + chalk.yellowBright(`${pushname} (${sender.split("@")[0]}) (Lid: ${msg.key.participantLid || 'não veio'})`) + "\n" +
+        chalk.blueBright("║★ ") + chalk.cyan("Usuário: ") + chalk.yellowBright(`${pushname} (${sender.split("@")[0]}) (Lid: ${senderLid || 'não veio'})`) + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Comando: ") + chalk.greenBright(cmd) + "\n" +
         chalk.blueBright("║★ ") + chalk.cyan("Horário: ") + chalk.gray(hora) + "\n" +
         chalk.blueBright("╚══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╝\n"))
