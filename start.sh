@@ -20,7 +20,7 @@ npm install
 printf "${GREEN}✅ Dependências instaladas com sucesso!${RESET}\n"
 fi
 
-SESSION_DIR="./configs/session"
+SESSION_DIR="./dono/configs/session"
 
 while true
 do

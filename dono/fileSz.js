@@ -1,4 +1,4 @@
-const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken} = require('../configs/settings.json');
+const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken} = require('./configs/settings.json');
 
 const selogpt = {key: {fromMe: false, participant: '0@s.whatsapp.net'}, message: { "extendedTextMessage": {"text": `Bot: ${botName}\nDono: ${donoName}`,"title": null,'thumbnailUrl': null}}}
 //pedrozz Mods

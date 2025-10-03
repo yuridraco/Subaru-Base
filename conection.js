@@ -15,7 +15,7 @@ const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkP
 
 const { handleCmds } = require("./index.js");
 let fotoperfil = fs.readFileSync("./database/imgs/perfil.jpeg");
-const { prefix, botName, donoName, donoNmr, idCanal } = require('./configs/settings.json');
+const { prefix, botName, donoName, donoNmr, idCanal } = require('./dono/configs/settings.json');
 
 const groupMetadataCache = new Map();
 async function getGroupMetadataSafe(groupId) {
@@ -29,14 +29,15 @@ const store = makeInMemoryStore({
 });
 
 const startConnection = async () => {
-  const { state, saveCreds } = await useMultiFileAuthState("./configs/session");
+  const { state, saveCreds } = await useMultiFileAuthState("./dono/configs/session");
   const { version } = await fetchLatestBaileysVersion();
   const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
 
   const subaru = makeWASocket({
     version: [2, 3000, 1023223821],
-    logger: pino({ level: "error" }),
+    logger: pino({ level: "silent" }),
     printQRInTerminal: !process.argv.includes("--code"),
+    browser: ['Linux', 'Opera', '110.0.5481.100'],
     auth: state,
     markOnlineOnConnect: false,
     syncFullHistory: false,
@@ -123,9 +124,9 @@ const startConnection = async () => {
 // Lista
     if (!comando && msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId) {
   comando = msg.message.listResponseMessage.singleSelectReply.selectedRowId; }   
-   await esperar(700)  
+   await esperar(100)  
    await handleCmds(subaru, msg); 
-   
+
     const logLine = "═".repeat(40);
     const chalk = require("chalk")
        if (cmd) {
@@ -187,6 +188,7 @@ const startConnection = async () => {
          contextInfo: { externalAdReply: {
          title: `Meu prefixo: ${prefix}`,
          body: '',
+         previewType: "PHOTO",
          thumbnailUrl: well,
          mediaType: 1,
          mediaUrl: 'https://raikken-api.speedhosting.cloud/',
