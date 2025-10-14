@@ -1,0 +1,7 @@
+[
+  "*Conexão estabelecida com sucesso!* 🚀\n> Dono: ${donoName}\n> Prefixo ativo: ${prefix}",
+  "*Bot reconectado!* 🤖\n> Proprietário: ${donoName}\n> Prefixo usado: ${prefix}",
+  "*E aí, chefia!* 💥\n> ${donoName}, o bot ligou de novo!\n> Prefixo: ${prefix}",
+  "*Sistema online!* ✅\n> Dono: ${donoName}\n> Prefixo: ${prefix}",
+  "Olá ${donoName}, eu já tô online✅"
+]

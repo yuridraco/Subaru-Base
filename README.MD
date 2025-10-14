@@ -1,111 +1,143 @@
-# 🤖 Subaru-BOT
+<p align="center">
+  <img src="https://files.catbox.moe/k24o03.png" alt="Subaru-Base" width="400"/>
+</p>
 
-Um bot para WhatsApp baseado em *Baileys*, com foco em automação de grupos, brincadeiras, sistemas de anti-mídia, jogos, figurinhas, inteligência artificial e muito mais.
+<h1 align="center">🤖 Subaru-Base</h1>
+
+<p align="center">
+  Um bot para WhatsApp baseado em <strong>Baileys</strong>, com foco em automação de grupos, brincadeiras, sistemas anti-mídia, jogos, figurinhas, inteligência artificial e muito mais!
+</p>
+
+<p align="center">
+  <a href="https://github.com/WhiskeySockets/Baileys"><img src="https://img.shields.io/badge/Baileys-Library-blue?style=for-the-badge&logo=whatsapp" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Node.js-18+-green?style=for-the-badge&logo=node.js" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" /></a>
+</p>
 
 
 ## ✨ Funcionalidades
 
-- 🎵 *Música & Mídia*
-  - Play de áudio/vídeo
-  - Downloads de YouTube, TikTok, Instagram, Facebook, Twitter
-  - Conversão para áudio ou documento
+### 🎵 Música & Mídia
+- Play de áudio/vídeo  
+- Downloads de *YouTube*, *TikTok*, *Instagram*, *Facebook*, *Twitter*
+- Conversão para áudio ou documento
 
-- 🛡️ *Sistema Anti*
-  - Antilink
-  - Anti-imagem
-  - Anti-vídeo
-  - Anti-figurinhas
-  - Anti-documento
-  - Anti-contato
-  - Anti-localização
-  - BanChat automático
+### 🛡️ Sistema Anti
+- Antilink  
+- Anti-imagem  
+- Anti-vídeo  
+- Anti-figurinhas  
+- Anti-documento  
+- Anti-contato  
+- Anti-localização  
+- BanChat automático  
 
-- 🎮 *Jogos*
-  - Jogo da velha
-  - Pedra, papel e tesoura
-  - Sistema NoFap (patentes motivacionais)
+### 🎮 Jogos
+- Jogo da velha  
+- Pedra, papel e tesoura  
+- Sistema **NoFap** (patentes motivacionais)
 
-- 🎭 *Brincadeiras*
-  - `chance`, `comer`, `capinarlote`, `pgpeito`, `pgbunda`, `sentar`, etc.
-  - Respostas interativas e vídeos engraçados
-  - Ranking de “gado”, “gay”, “corno”, etc.
+### 🎭 Brincadeiras
+- `chance`, `comer`, `capinarlote`, `pgpeito`, `pgbunda`, `sentar`, etc  
+- Respostas interativas e vídeos engraçados  
+- Rankings de “gado”, “gay”, “corno”, etc  
 
-- 📝 *Utilidades*
-  - Conversão de mídia em figurinhas
-  - Sistema de contagem de mensagens (`minhaatividade`)
-  - Bem-vindo automático
-  - IA estilo SimSimi (via API Raikken)
-  - Menu interativo com botões
-
+### 📝 Utilidades
+- Conversão de mídia em *figurinhas*
+- Sistema de *contagem de mensagens* (`!minhaatividade`)
+- *Boas-vindas automáticas*
+- *IA estilo SimSimi* (via [Raikken API](https://raikken-api.speedhosting.cloud))
+- *Menu interativo com botões*
 
 ## 🚀 Instalação
 
-1. Baixei o bot, disponível em: https://mega.nz/file/3DxTWBqA#sAYDC5Xvy-oYMuXYAAdIUi1iBiArTSScpG-vuJ0dOvc
+### Baixe o bot
+📦 [Download direto V1 (MEGA)](https://mega.nz/file/3DxTWBqA#sAYDC5Xvy-oYMuXYAAdIUi1iBiArTSScpG-vuJ0dOvc)
 
-2. Instale as dependências (se necessário)
+🧩 Instalação via Git
+1️⃣ Clone o repositório
+git clone https://github.com/szkkj/Subaru-Base
+
+2️⃣ Acesse a pasta
+cd Subaru-Base/
+
+3️⃣Instale as dependências (se necessário)
 npm install
 
-3. Configure
-Edite o arquivo ./configs/settings.json:
-
+4️⃣ Configure
+Edite o arquivo ./dono/configs/settings.json:
 {
   "prefix": "!",
-  "botName": "Subaru-BOT",
+  "botName": "Subaru-Base",
   "donoName": "Seu Nome",
   "donoNmr": "5512999999999",
+  "donoLid": "99999999999@lid",
+  "botLid": "99999999999@lid",
   "RaikkenKey": "SUA_API_KEY",
   "baseRaikken": "https://raikken-api.speedhosting.cloud"
 }
 
-- No momento, essa base está com a Key "raikken", que por enquanto está ativa é gratuita, mas é provável que bem em breve vai ser consumida rápida, então procure comprar uma nova comigo diretamente: wa.me/559292678251
+> ⚠️ Nota: A chave "raikken" ainda está ativa e gratuita, mas pode expirar a qualquer momento.
+Para obter uma nova, entre em contato: WhatsApp
 
-▶️ Uso
+5️⃣ Inicie o bot
+sh start.sh
+
+💡 Dica:
+Se quiser atualizar o bot no futuro, entre na pasta e use:
+git pull
+
+### ▶️ Uso
 Inicie o bot com uma das opções:
+npm start                # Login via Pairing Code
+node conection.js        # Login via QR Code
+node conection.js --code # Pairing Code (manual)
+sh start.sh              # Ambos (recomendado)
 
-- npm start (código pairing)
-- node conection.js (código QR)
-- node conection.js --code (Código pairing)
-- sh start.sh (ambos, escolha o melhor) *RECOMENDADO*
-
-No WhatsApp, use comandos com prefixo definido no settings.json.
+Depois, use os comandos no WhatsApp conforme o prefixo definido.
 Exemplos:
-
-!menu → Mostra o menu
-!sticker → Cria figurinha de imagem ou vídeo
+!menu              → Mostra o menu
+!sticker           → Cria figurinha
 !jogodavelha @membro → Inicia jogo da velha
-!minhaatividade → Mostra suas estatísticas no grupo
-!play → toca música
-!tinder → funções de Tinder
-
-##O bot conta com botões e não dá para desativar
+!minhaatividade    → Mostra suas estatísticas
+!play              → Toca música
+!tinder            → Funções de Tinder
+!ban            → bane o mencionado
 
 ⚡ Deploy
-Pode ser hospedado em:
-Termux
-Pterodactyl
-VPS/Linux
-Heroku (requer ajustes)
+O bot pode ser hospedado em:
+Ambiente	Suporte
+🧩 Termux	✅
+🖥️ Pterodactyl	✅
+🐧 VPS/Linux	✅
+☁️ Heroku	⚠️ (requer ajustes)
 
 
 👤 Créditos
-
-Base feita em Baileys
-Criado por Sz
+Base: Baileys
+Criação: Sz
 Integração IA: Raikken API
 
-
 📜 Licença
+Distribuído sob a Licença MIT.
+Sinta-se livre para modificar, melhorar e usar.
 
-Distribuído sob licença MIT.
-Sinta-se livre para modificar e usar.
+💀 Considerações — By Sz
+Pra ser bem sincero, nem tava nos meus planos escrever esse texto aqui, mas acho que seria injusto não registrar umas coisas importantes.
+Então bora lá 👇
 
+Agradecimentos especiais a: Spiral, Reis, Creeper, Thzy, Riki e Duarte, que testaram, deram feedback e ajudaram o bot a ficar como tá hoje.
+E claro, Anguish, cuja base inspirou o multi menu usado aqui 💪
 
-💀 Considerações, By Sz
+A todos que esperaram esse projeto — obrigado de verdade!
+E se você tá lendo até o fim... pô, muito obrigado mesmo 😂
+Tamo junto, e se curtir, dá aquela força e segue o canal!
 
-Pra ser bem sincero, nem tava nos meus planos escrever esse texto aqui, mas acho que seria injusto não registrar umas coisas importantes. Então, bora lá.
-Primeiro, quero agradecer de coração aos meus parceiros Spiral, Reis, Creeper, Thzy, Riki e Duarte, que foram testando a base/bot, dando feedback e ajudando a decidir qual caminho dava o melhor resultado. De verdade, vocês fizeram a diferença!
-Também não posso deixar de citar o Anguish, porque foi do bot dele que veio a ideia do multi menu que implementei aqui. Valeu demais por essa inspiração e contribuição indireta.
-A todos que ficaram esperando esse arquivo (se realmente teve alguém) muito obrigado! 
-E olha, se você realmente tá lendo isso aqui até o final… pô, muito obrigado mesmo! 😂 Tamo junto, e se curtir o projeto, dá aquela força e segue o canal kkkkk.
-
-Com isso, já irei trabalhar para o meu próximo trampo e disponibilizar esse arquivo no Github. 
+<p align="center">
+  <a href="https://wa.me/559292678251">
+    <img src="https://img.shields.io/badge/💬%20Falar%20com%20o%20dono-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" />
+  </a>
+  <a href="https://github.com/szkkj/Subaru-Base/">
+    <img src="https://img.shields.io/badge/⭐%20Github%20do%20projeto-181717?style=for-the-badge&logo=github" />
+  </a>
+</p>

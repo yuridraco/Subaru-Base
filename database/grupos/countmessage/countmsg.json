@@ -4,16 +4,16 @@
     "numbers": [
       {
         "id": "559292678251@s.whatsapp.net",
-        "messages": 265,
+        "messages": 460,
         "figus": 0,
-        "cmd_messages": 285,
+        "cmd_messages": 417,
         "aparelho": "Android",
         "joinedAt": "13/09/2025 18:45:27"
       },
       {
         "id": "120363214063579100@g.us",
-        "messages": 21,
-        "cmd_messages": 2,
+        "messages": 23,
+        "cmd_messages": 4,
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "17/09/2025 16:42:25"
@@ -49,6 +49,14 @@
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "29/09/2025 22:51:56"
+      },
+      {
+        "id": "78624208212191@lid",
+        "messages": 42,
+        "cmd_messages": 27,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "10/10/2025 17:59:40"
       }
     ]
   },
@@ -2064,7 +2072,7 @@
       },
       {
         "id": "78624208212191@lid",
-        "messages": 0,
+        "messages": 1,
         "cmd_messages": 1,
         "aparelho": "Android",
         "figus": 0,
@@ -3379,6 +3387,54 @@
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "30/09/2025 13:47:38"
+      },
+      {
+        "id": "559292678251@s.whatsapp.net",
+        "messages": 5,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "09/10/2025 17:37:39"
+      },
+      {
+        "id": "78624208212191@lid",
+        "messages": 11,
+        "cmd_messages": 5,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "10/10/2025 17:13:55"
+      },
+      {
+        "id": "114654638526501@lid",
+        "messages": 3,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "10/10/2025 21:59:14"
+      },
+      {
+        "id": "121208574054605@lid",
+        "messages": 1,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "11/10/2025 11:50:16"
+      },
+      {
+        "id": "208194882289841@lid",
+        "messages": 16,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "11/10/2025 12:40:35"
+      },
+      {
+        "id": "2963594596553@lid",
+        "messages": 2,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "11/10/2025 12:43:23"
       }
     ]
   },
@@ -5253,7 +5309,7 @@
     "numbers": [
       {
         "id": "120363420767305082@g.us",
-        "messages": 23,
+        "messages": 81,
         "figus": 0,
         "cmd_messages": 6,
         "aparelho": "Android",
@@ -5261,24 +5317,24 @@
       },
       {
         "id": "559292678251@s.whatsapp.net",
-        "messages": 558,
-        "cmd_messages": 123,
+        "messages": 1256,
+        "cmd_messages": 300,
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "24/09/2025 21:17:38"
       },
       {
         "id": "59163005451@s.whatsapp.net",
-        "messages": 357,
-        "cmd_messages": 33,
+        "messages": 794,
+        "cmd_messages": 142,
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "24/09/2025 21:17:49"
       },
       {
         "id": "46807275040942@lid",
-        "messages": 1,
-        "cmd_messages": 0,
+        "messages": 454,
+        "cmd_messages": 30,
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "24/09/2025 21:33:24"
@@ -5293,15 +5349,15 @@
       },
       {
         "id": "78624208212191@lid",
-        "messages": 2,
-        "cmd_messages": 0,
+        "messages": 292,
+        "cmd_messages": 27,
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "24/09/2025 21:38:11"
       },
       {
         "id": "5512988436073@s.whatsapp.net",
-        "messages": 67,
+        "messages": 105,
         "cmd_messages": 1,
         "aparelho": "Android",
         "figus": 0,
@@ -5325,7 +5381,7 @@
       },
       {
         "id": "2963594596553@lid",
-        "messages": 3,
+        "messages": 53,
         "cmd_messages": 0,
         "aparelho": "Android",
         "figus": 0,
@@ -5349,19 +5405,67 @@
       },
       {
         "id": "5511915868989@s.whatsapp.net",
-        "messages": 74,
-        "cmd_messages": 1,
+        "messages": 1000,
+        "cmd_messages": 7,
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "30/09/2025 21:39:23"
       },
       {
         "id": "5511965027014@s.whatsapp.net",
-        "messages": 6,
+        "messages": 316,
         "cmd_messages": 0,
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "30/09/2025 21:47:33"
+      },
+      {
+        "id": "5519988770009@s.whatsapp.net",
+        "messages": 1,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "08/10/2025 23:36:32"
+      },
+      {
+        "id": "5519999105063@s.whatsapp.net",
+        "messages": 2,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "09/10/2025 19:40:21"
+      },
+      {
+        "id": "92062909235447@lid",
+        "messages": 674,
+        "cmd_messages": 1,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "10/10/2025 17:41:43"
+      },
+      {
+        "id": "42937475924017@lid",
+        "messages": 41,
+        "cmd_messages": 0,
+        "aparelho": "WhatsApp Web",
+        "figus": 0,
+        "joinedAt": "10/10/2025 17:44:28"
+      },
+      {
+        "id": "168406288437319@lid",
+        "messages": 174,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "10/10/2025 20:03:00"
+      },
+      {
+        "id": "151033145778344@lid",
+        "messages": 20,
+        "cmd_messages": 0,
+        "aparelho": "WhatsApp Web",
+        "figus": 0,
+        "joinedAt": "13/10/2025 22:41:00"
       }
     ]
   },
@@ -5744,7 +5848,7 @@
       },
       {
         "id": "559292678251@s.whatsapp.net",
-        "messages": 1,
+        "messages": 3,
         "cmd_messages": 0,
         "aparelho": "Android",
         "figus": 0,
@@ -5757,19 +5861,35 @@
     "numbers": [
       {
         "id": "559292678251@s.whatsapp.net",
-        "messages": 1,
+        "messages": 10,
         "figus": 0,
-        "cmd_messages": 0,
+        "cmd_messages": 35,
         "aparelho": "Android",
         "joinedAt": "28/09/2025 02:45:50"
       },
       {
         "id": "5512996053174@s.whatsapp.net",
-        "messages": 1,
-        "cmd_messages": 0,
+        "messages": 14,
+        "cmd_messages": 13,
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "28/09/2025 02:46:27"
+      },
+      {
+        "id": "5512988436073@s.whatsapp.net",
+        "messages": 3,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "08/10/2025 15:36:31"
+      },
+      {
+        "id": "120363405257566615@g.us",
+        "messages": 0,
+        "cmd_messages": 1,
+        "aparelho": "Android",
+        "figus": 0,
+        "joinedAt": "10/10/2025 10:19:10"
       }
     ]
   },
@@ -5786,7 +5906,7 @@
       },
       {
         "id": "559292678251@s.whatsapp.net",
-        "messages": 19,
+        "messages": 20,
         "cmd_messages": 3,
         "aparelho": "Android",
         "figus": 0,
@@ -6049,6 +6169,19 @@
         "aparelho": "Android",
         "figus": 0,
         "joinedAt": "30/09/2025 20:01:40"
+      }
+    ]
+  },
+  {
+    "groupId": "120363419398434756@g.us",
+    "numbers": [
+      {
+        "id": "559292678251@s.whatsapp.net",
+        "messages": 0,
+        "figus": 0,
+        "cmd_messages": 0,
+        "aparelho": "Android",
+        "joinedAt": "10/10/2025 17:06:35"
       }
     ]
   }

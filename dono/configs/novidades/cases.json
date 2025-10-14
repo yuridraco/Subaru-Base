@@ -1198,5 +1198,97 @@
   {
     "Comando": "linkimage",
     "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "lista",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "checarversao",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "atualizar",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "nao-atualizar",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "take",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "rgtake",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "rntake",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "namorar",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "casar",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "divorciar",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "divorcio",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "addamante",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "terfilho",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "familia",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "listaramantes",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "filhos",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "namoracomigo",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "casacomigo",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "filho",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "terminar",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "autosticker",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "autodl",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "level",
+    "Função": "Descrição pendente."
   }
 ]

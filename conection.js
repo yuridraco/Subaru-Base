@@ -5,25 +5,48 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType } = require("baileys");
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType, makeCacheableSignalKeyStore, cacheService } = require("baileys");
 const fs = require('fs')
 const pino = require("pino");
 const chalk = require('chalk')
 const path= require('path')
 const readline = require("readline");
-const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, sincronizarCases, esperar } = require('./dono/functions.js')
+const NodeCache  = require('node-cache');
+const LoggerB = require('baileys/lib/Utils/logger').default;
+const logger = LoggerB.child({});  
+logger.level = 'silent';  
+const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, sincronizarCases, esperar, groupConfigCache, delay, getRandomSaudacao } = require('./dono/functions.js')
 
 const { handleCmds } = require("./index.js");
 let fotoperfil = fs.readFileSync("./database/imgs/perfil.jpeg");
 const { prefix, botName, donoName, donoNmr, idCanal } = require('./dono/configs/settings.json');
 
-const groupMetadataCache = new Map();
-async function getGroupMetadataSafe(groupId) {
-if (groupMetadataCache.has(groupId)) {
-return groupMetadataCache.get(groupId);
-}
+const groupMetadataCache = new NodeCache({
+stdTTL: 300,
+checkperiod: 120 
+});
+
+async function getGroupMetadataSafe(groupId, subaru) {
+if (groupMetadataCache.has(groupId)) { return groupMetadataCache.get(groupId)}
+try {
+const meta = await subaru.groupMetadata(groupId);
+groupMetadataCache.set(groupId, meta);
+return meta;
+} catch (e) {
+console.error(`Erro ao buscar metadata do grupo ${groupId}:`, e);
+return { subject: "Grupo Desconhecido", participants: [] };
+}}
+
+function getGroupConfig(id) {
+const cached = groupConfigCache.get(id);
+if (cached) return cached;
+if (!fs.existsSync(`./database/grupos/${id}.json`)) return null;
+const config = JSON.parse(fs.readFileSync(`./database/grupos/${id}.json`));
+groupConfigCache.set(id, config);
+return config;
 }
 
+const well = fs.readFileSync("./database/imgs/well.png");
 const store = makeInMemoryStore({
   logger: pino().child({ level: "silent", stream: "store" }),
 });
@@ -34,13 +57,15 @@ const startConnection = async () => {
   const isJidNewsletter = (jid) => jid?.endsWith("@newsletter");
 
   const subaru = makeWASocket({
-    version: [2, 3000, 1023223821],
+    version: [2, 3000, 1025190524],
     logger: pino({ level: "silent" }),
     printQRInTerminal: !process.argv.includes("--code"),
     browser: ['Linux', 'Opera', '110.0.5481.100'],
     auth: state,
     markOnlineOnConnect: false,
     syncFullHistory: false,
+    keys: makeCacheableSignalKeyStore(state.keys, logger),  
+    groupMetadataCache,
     shouldIgnoreJid: (jid) =>
       isJidBroadcast(jid) || isJidStatusBroadcast(jid) || isJidNewsletter(jid),
     getMessage: async (key) => {
@@ -48,7 +73,7 @@ const startConnection = async () => {
       return msg?.message || undefined;
     },
   });
-
+    
   store.bind(subaru.ev);
   if (process.argv.includes("--code") && !subaru.authState.creds.registered) {
     const rl = readline.createInterface({
@@ -63,6 +88,7 @@ const startConnection = async () => {
     rl.close();
   }
 
+  let isRestart = false
   subaru.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect } = update;
     if (connection === "close") {
@@ -71,36 +97,37 @@ const startConnection = async () => {
       console.log(`Conexão fechada. Motivo: ${lastDisconnect.error?.output?.statusCode}.`),
         console.log(`Reconectando: ${shouldReconnect}`)
       if (shouldReconnect) {
+        isRestart = true
         startConnection();
       }
     } else if (connection === "open") {
+     if (!isRestart) {
      await esperar(500)
      await subaru.updateProfilePicture(subaru.user.id, fotoperfil);
      await esperar(500)
-     await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, {text: `Eu sou Subaru! Não tenho muito para dizer!`})
-     await console.log(chalk.blueBright("\nSubaru-Bot ativo!\n"));
-     await esperar(500)
+     const saudacao = getRandomSaudacao(donoName, prefix);
+     await subaru.sendMessage(`${donoNmr}@s.whatsapp.net`, { text: saudacao });
      await sincronizarCases(subaru)
+     }
+     await console.log(chalk.blueBright("\nSubaru-Bot ativo!\n"));
     }
   });
 
   subaru.ev.on("creds.update", saveCreds);
 
   subaru.ev.on("messages.upsert", async ({ messages, type }) => {
-    const msg = messages[0];
-    
+    const msg = messages[0];    
     try {
     if (type !== "notify" || !msg.message || msg.key.remoteJid === "status@broadcast") {return; }
     if (!msg.message) {return; }
     const info = msg 
-    var body = info.message?.conversation || info.message?.viewOnceMessageV2?.message?.imageMessage?.caption || info.message?.viewOnceMessageV2?.message?.videoMessage?.caption || info.message?.imageMessage?.caption || info.message?.videoMessage?.caption || info.message?.extendedTextMessage?.text || info.message?.viewOnceMessage?.message?.videoMessage?.caption || info.message?.viewOnceMessage?.message?.imageMessage?.caption || info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption || info.message?.buttonsMessage?.imageMessage?.caption || info.message?.buttonsResponseMessage?.selectedButtonId || info.message?.listResponseMessage?.singleSelectReply?.selectedRowId || info.message?.templateButtonReplyMessage?.selectedId || info?.text || info.message?.editedMessage?.message?.protocolMessage?.editedMessage?.extendedTextMessage?.text || info.message?.editedMessage?.message?.protocolMessage?.editedMessage?.imageMessage?.caption || info.message?.conversation || info.message?.viewOnceMessageV2?.message?.imageMessage?.caption || info.message?.viewOnceMessageV2?.message?.videoMessage?.caption || info.message?.imageMessage?.caption || info.message?.videoMessage?.caption || info.message?.extendedTextMessage?.text || info.message?.viewOnceMessage?.message?.videoMessage?.caption || info.message?.viewOnceMessage?.message?.imageMessage?.caption || info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption || info.message?.buttonsMessage?.imageMessage?.caption || info.message?.buttonsResponseMessage?.selectedButtonId || info.message?.listResponseMessage?.singleSelectReply?.selectedRowId || info.message?.templateButtonReplyMessage?.selectedId || JSON.parse(info.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson || '{}')?.id || 
-   info?.text || '';
+    var body = info.message?.conversation || info.message?.viewOnceMessageV2?.message?.imageMessage?.caption || info.message?.viewOnceMessageV2?.message?.videoMessage?.caption || info.message?.imageMessage?.caption || info.message?.videoMessage?.caption || info.message?.extendedTextMessage?.text || info.message?.viewOnceMessage?.message?.videoMessage?.caption || info.message?.viewOnceMessage?.message?.imageMessage?.caption || info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption || info.message?.buttonsMessage?.imageMessage?.caption || info.message?.buttonsResponseMessage?.selectedButtonId || info.message?.listResponseMessage?.singleSelectReply?.selectedRowId || info.message?.templateButtonReplyMessage?.selectedId || info?.text || ""
     const from = msg.key.remoteJid || msg.key.remoteLid || msg.key.participantAlt;    
     const isGroup = from.endsWith("@g.us");
     const isCmd = body.startsWith(prefix);
     const sender = msg.key.participant || msg.key.remoteJid || msg.key.remoteLid || msg.key.participantLid || msg.key.participantAlt
     const pushname = msg.pushName || "Usuário";
-    const groupMetadata = isGroup ? await subaru.groupMetadata(from) : {};
+    const groupMetadata = isGroup ? await getGroupMetadataSafe(from, subaru) : {};
     const groupName = isGroup ? groupMetadata.subject : "Conversa Privada";
     const groupMembers = isGroup ? groupMetadata.participants : []
     const senderObject = groupMembers.find(member => member.jid === sender);
@@ -123,13 +150,23 @@ const startConnection = async () => {
   comando = msg.message.buttonsResponseMessage.selectedButtonId; }
 // Lista
     if (!comando && msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId) {
-  comando = msg.message.listResponseMessage.singleSelectReply.selectedRowId; }   
-   await esperar(100)  
-   await handleCmds(subaru, msg); 
-
-    const logLine = "═".repeat(40);
-    const chalk = require("chalk")
-       if (cmd) {
+  comando = msg.message.listResponseMessage.singleSelectReply.selectedRowId; }  
+   
+    const messageQueue = [];
+    let processingQueue = false;
+    async function processQueue() {
+      if (processingQueue) return;
+      processingQueue = true;
+      while (messageQueue.length > 0) {
+      const msg = messageQueue.shift();
+      await handleCmds(subaru, msg);
+      await new Promise(r => setTimeout(r, delay));  }
+       processingQueue = false;}
+     messageQueue.push(msg);
+     processQueue();
+    
+      
+     if (cmd) {
         console.log(
         chalk.blueBright("\n╔══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╗") + "\n" +
         chalk.blueBright("║★ ") + chalk.white.bold("[ COMANDO DETECTADO ]") + "\n" +
@@ -152,7 +189,7 @@ const startConnection = async () => {
         chalk.blueBright("║★ ") + chalk.cyan("Horário: ") + chalk.gray(hora) + "\n" +
         chalk.blueBright("╚══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╝\n"))}
     } catch (err) {
-        if (String(err).includes('SenderKeyRecord') || String(err).includes('decrypt')) {
+        if (String(err).includes('SenderKeyRecord') || String(err).includes('decrypt') || String(err).includes('SenderKeyRecord') || String(err).includes('no session')) {
             console.log('⚠️ Mensagem não pôde ser decriptada (sem chave SenderKey), ignorando...');
             return;
         }
@@ -162,15 +199,14 @@ const startConnection = async () => {
   
   subaru.ev.on("group-participants.update", async (update) => {
     const { id, action, participants } = update;
-    const groupSettingsPath = `./database/grupos/${id}.json`;
-    const thumbnailPath = path.join(__dirname, 'database', 'imgs', 'perfil.jpeg');
-    const well = fs.readFileSync(thumbnailPath);
+    const groupSettingsPath = `./database/grupos/${id}.json`;   
     if (!fs.existsSync(groupSettingsPath)) return;
     try {
-      const groupSettings = JSON.parse(fs.readFileSync(groupSettingsPath));
+      const groupSettings = getGroupConfig(id);
+       if (!groupSettings) return;
       const welcomeConfig = groupSettings[0]?.bemVindo?.[0];
       if (!welcomeConfig?.ativo) return;
-      const groupMetadata = await subaru.groupMetadata(id);
+      const groupMetadata = await getGroupMetadataSafe(id, subaru);
       const groupName = groupMetadata.subject;
       const member = participants[0];
       let textinh = "";
@@ -200,9 +236,11 @@ const startConnection = async () => {
           fs.unlinkSync(groupSettingsPath);
       }
     }
+    cacheService.saveGroupMetadata(update, groupMetadata);
   });
 
   return subaru;
+  
 };
 
 fs.watchFile(__filename, () => {

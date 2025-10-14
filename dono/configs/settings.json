@@ -7,8 +7,9 @@
   "donoNmr": "559292678251",
   "donoLid": "78624208212191@lid",
   "botLid": "2963594596553@lid",
+  "baseVersion": "2.0.0",
   "baseRaikken": "https://raikken-api.speedhosting.cloud/api",
   "baseRaikkenTinder": "https://raikken-api.speedhosting.cloud/api/tinder",
-  "RaikkenKey": "raikken",
+  "RaikkenKey": "suakey",
   "idCanal": "120363423245306332@newsletter"
 }

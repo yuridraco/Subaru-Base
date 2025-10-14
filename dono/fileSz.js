@@ -121,14 +121,47 @@ const seloface = {
   const seloloc = {
   "key": 
   {"fromMe": false,
-    "participant":
-    "0@s.whatsapp.net",
-    "remoteJid": 'status@broadcast'},
-    message: {liveLocationMessage: 
-      {degreesLatitude: 173.282, 
-        degreesLongitude: -19.378,
-        sequenceNumber: "1657237469254001", 
-        thumbnail: null, 
-        caption: `Bem vindo`}}}
+"participant":
+"0@s.whatsapp.net",
+"remoteJid": 'status@broadcast'},
+message: {liveLocationMessage: 
+  {degreesLatitude: 173.282, 
+degreesLongitude: -19.378,
+sequenceNumber: "1657237469254001", 
+thumbnail: null, 
+caption: `Bem vindo`}}}
 
-module.exports = {  selogpt,  seloCriador, seloGpt,  seloMeta,  seloLuzia,  seloLaura,  seloCopilot,  seloNubank,  seloBb,  seloBradesco, seloSantander,  seloItau, selodoc, pay, seloSz,  seloface,  seloluzia, seloloc};
+const seloSticker = {
+key: {
+fromMe: false,
+participant: "0@s.whatsapp.net",
+remoteJid: "status@broadcast"
+},
+message: {
+stickerPackMessage: {
+stickerPackId: "\000",
+name: ` By ${donoName}.`,
+publisher: "kkkk"
+}
+}
+}
+
+const spiral = (pushname, senderJid) => ({
+"key": {
+"participant": "0@s.whatsapp.net",
+"remoteJid": "status@broadcast", 
+"fromMe": false, 
+},
+"message": {
+"contactMessage": {
+"displayName": `${pushname}`, 
+"vcard": `BEGIN:VCARD\nVERSION:3.0\nN:;${pushname};;;\nFN:${pushname}\nitem1.TEL;waid=${senderJid.split('@')[0]}:${donoNmr}\nitem1.X-ABLabel:Celular\nEND:VCARD`, 
+"contextInfo": {
+"forwardingScore": 1000,
+"isForwarded": true
+}
+}
+}
+})
+
+module.exports = {  selogpt,  seloCriador, seloGpt,  seloMeta,  seloLuzia,  seloLaura,  seloCopilot,  seloNubank,  seloBb,  seloBradesco, seloSantander,  seloItau, selodoc, pay, seloSz,  seloface,  seloluzia, seloloc, seloSticker, spiral };

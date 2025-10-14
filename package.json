@@ -1,8 +1,8 @@
 {
   "name": "subaru-base",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "private": true,
-  "description": "Bot de WhatsApp utilizando Baileys-Mod com conexão via pairing code e QR.",
+  "description": "Bot de WhatsApp utilizando Baileys com conexão via pairing code e QR.",
   "main": "index.js",
   "scripts": {
     "start": "node conection.js --code",
@@ -231,6 +231,7 @@
     "multimatch": "5.0.0",
     "music-metadata": "7.14.0",
     "negotiator": "1.0.0",
+    "node-cache": "^5.1.2",
     "node-fetch": "2.6.9",
     "node-fzf": "0.14.0",
     "node-webpmux": "3.2.1",
@@ -364,8 +365,6 @@
     "xmlbuilder": "11.0.1",
     "xmlchars": "2.2.0",
     "xtend": "4.0.2",
-    "yt-search": "2.13.1",
-    "ytdl-core": "4.11.5",
     "zod": "3.25.7"
   }
 }

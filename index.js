@@ -8,9 +8,9 @@
 */
 
 /* ===========================//CONSTS\\================================//*/
-const { default:makeWASocket, DisconnectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, delay, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys, getSenderLid, toJid } = require("baileys");
+const { default:makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys, cacheService } = require("baileys");
 
-const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, cheerio, moment, mss, sendPoll, imageToWebp, videoToWebp, writeExifImg, writeExifVid, imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2, getMembros, getAdmins, util } = require('./dono/exports-consts.js')
+const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, cheerio, moment, mss, sendPoll, imageToWebp, videoToWebp, writeExifImg, writeExifVid, imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2, getMembros, getAdmins, util, rgtake, botSemKey } = require('./dono/exports-consts.js')
 
 const { getPlugin, loadPlugins } = require("./dono/functions.js");
 
@@ -18,19 +18,31 @@ const { prefix, botName, donoName, donoNmr, RaikkenKey, baseRaikken, idCanal, bo
 
 const { menumembros, menuAdm, menubn, menudono, menugeral } = require('./dono/configs/menus.js')
 
-const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON, saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, onlyNumbers, toUserLid, toUserOrGroupJid, registrarAluguel, renovarAluguel, removerAluguel, listarAlugueis, verificarAlugueis, carregarAlugueis, gerarlinkUploadCatbox, bytesParaMB, getBufferFromUrl } = require('./dono/functions.js')
+const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, loadJSON, saveJSON, saveJSON2, sincronizarCases, lerOuCriarJSON, onlyNumbers, toUserLid, toUserOrGroupJid, registrarAluguel, renovarAluguel, removerAluguel, listarAlugueis, verificarAlugueis, carregarAlugueis, gerarlinkUploadCatbox, bytesParaMB, getBufferFromUrl, checarVersao, atualizarBot, emCooldown, tempoRestante, delay, getFamiliaData } = require('./dono/functions.js')
 
-const { selogpt, seloCriador, seloGpt, seloMeta, seloLuzia , seloLaura,seloCopilot, seloNubank, seloBb,seloBradesco, seloSantander, seloItau, selodoc, pay, seloSz, seloface, seloluzia, seloloc } = require("./dono/fileSz.js")
+const { selogpt, seloCriador, seloGpt, seloMeta, seloLuzia , seloLaura,seloCopilot, seloNubank, seloBb,seloBradesco, seloSantander, seloItau, selodoc, pay, seloSz, seloface, seloluzia, seloloc, seloSticker, spiral } = require("./dono/fileSz.js")
 
 const selo = seloSz
 
 const { menuimg, erroImg, defaultAvatar, imgnazista, imggay, imgcorno, imggostosa, imggostoso, imgfeio, imgvesgo, imgbebado, imggado, matarcmd, deathcmd, beijocmd, chutecmd, tapacmd, rnkgay, rnkgado, cmdmenu, rnkcorno, rnkgostoso, rnkgostosa, rnknazista, rnkotaku, rnkpau, suruba, minado_bomb, thumbnail, imgsigma, imgbeta, imgbaiano, imgbaiana, imgcarioca, imglouco, imglouca, imgsafada, imgsafado, imgmacaco, imgmacaca, imgputa, rnksigma, rnkbeta, rnkbaiano, rnkbaiana, rnkcarioca, rnklouco, rnklouca, rnksafada, rnksafado, rnkmacaco, rnkmacaca, errocmd, rnkputa } = require("./dono/configs/links.json")
 
-const groupMetadataCache = new Map();
-async function getGroupMetadataSafe(groupId) {
-if (groupMetadataCache.has(groupId)) {
-return groupMetadataCache.get(groupId);
-}}
+
+async function getGroupMetadataSafe(groupId, subaru) {
+const cached = cacheService.getGroupMetadata(groupId);
+if (cached) return cached;
+const meta = await cacheService.updateFromAPI(groupId, subaru);
+if (meta) return meta;
+return { id: groupId, subject: "Grupo Desconhecido", participants: [] };
+}
+
+function getGroupConfig(id) {
+const cached = groupConfigCache.get(id);
+if (cached) return cached;
+if (!fs.existsSync(`./database/grupos/${id}.json`)) return null;
+const config = JSON.parse(fs.readFileSync(`./database/grupos/${id}.json`));
+groupConfigCache.set(id, config);
+return config;
+}
 
 /* ===========================//INICIO\\================================ */
 const handleCmds = async (subaru, msg) => {
@@ -110,6 +122,29 @@ if(i.admin == 'superadmin') admins.push(i.id)
 }
 return admins
 }
+
+const toJid = (id) => {
+if (!id)
+return '';
+if (id.endsWith('@lid'))
+return id.replace('@lid', '@s.whatsapp.net');
+if (id.includes('@'))
+return id;
+return `${id}@s.whatsapp.net`;
+};
+
+function getSenderLid(msg) {
+const { jidDecode, jidEncode } = require('baileys');
+try {
+const sender = msg?.key?.participant || msg?.key?.remoteJid || msg?.key?.remoteLid || msg?.key?.participantLid || msg?.key?.participantAlt || '';
+const user = jidDecode(sender)?.user || sender.split('@')[0] || '';
+const lid = jidEncode(user, 'lid');
+return { jid: sender, lid };
+} catch (err) {
+// console.error('Erro ao gerar LID do remetente:', err);
+return { jid: null, lid: null };
+}}
+
 const groupMetadata = isGroup ? await subaru.groupMetadata(from): ""
 const participants = isGroup ? await groupMetadata.participants : ''
 const groupName = isGroup? groupMetadata.subject: ""
@@ -118,18 +153,27 @@ const groupMembers = isGroup ? groupMetadata.participants : []
 const groupMemb2 = isGroup ? groupMetadata.participants.map(p => p.id) : []
 const groupAdmins = isGroup ? getGroupAdmins(groupMembers) : ''
 let senderJid;
-if (isGroup) { const participant = info.key.participant;
-if (!participant) { senderJid = null; 
-} else if (participant.includes(':')) { senderJid = participant.split(':')[0] + '@s.whatsapp.net';
-} else if (participant.endsWith('@lid')) { senderJid = null;
-} else { senderJid = participant}
+if (isGroup) {
+const participant = info.key.participant;
+if (!participant) {
+senderJid = null;
+} else if (participant.includes(':')) {
+senderJid = participant.split(':')[0] + '@s.whatsapp.net';
+} else if (participant.endsWith('@lid')) {
+const membro = groupMembers.find(m => m.lid === participant);
+senderJid = membro ? membro.jid : null; 
+} else {
+senderJid = participant;
+}
 } else {
 senderJid = info.key.remoteJid;
 }
+
 const senderObject = groupMembers.find(member => member.jid === sender);
 let senderLid = null
 if (senderObject) {
-senderLid = senderObject.lid; }
+senderLid = senderObject.lid || senderObject.id || null}
+const sender2 = senderLid || senderJid
 const isCmd = content.startsWith(prefix)
 const cmd = isCmd ? content.slice(1).trim().split(/ +/).shift().toLocaleLowerCase() : null
 const comando = cmd;
@@ -137,7 +181,7 @@ const pushname = info.pushName ? info.pushName : ""
 const numeroBot = subaru.user.id.split(":")[0]+"@s.whatsapp.net"
 const isDono = sender.includes(donoNmr) || sender === donoLid
 const isBotGroupAdmins = groupAdmins.includes(botLid2) || groupAdmins.includes(numeroBot) || false;
-const isGroupAdmins = groupAdmins.includes(sender) || groupAdmins.includes(senderLid) || groupAdmins.includes(senderJid) || isDono || false;
+const isGroupAdmins = groupAdmins.includes(sender) || groupAdmins.includes(senderLid) || groupAdmins.includes(senderJid) || groupAdmins.includes(sender2) || isDono || false;
 const isAdm = isGroupAdmins
 const participantes = isGroup ? groupMetadata.participants.map(usuario => usuario.id) : ''
 const mencionados = isGroup ? participantes.sort(() => 0.5 - Math.random()).slice(0, 5) : '' 
@@ -171,9 +215,7 @@ isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: `${idCanal}`,
 newsletterName: '『𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞』'
-}
-}
-}, { quoted: info });
+}}}, { quoted: info });
 }
 
 async function reply2 (texto) {
@@ -233,7 +275,7 @@ subaru.sendMessage(from, { audio: { url: link }, mimetype: "audio/mpeg", ptt: tr
 // Envia uma imagem mencionando usuários no texto.
 const mencionarIMG = async (teks = '', FileN, membrosGrupo = []) => {
 const memberr = []
-const senderInfo = getSenderLid(thisQuoted)
+const senderInfo = getSenderLid(somembros)
 const senderJid = toJid(senderInfo.lid)
 memberr.push(senderJid)
 const palavras = teks.split(/\s+/)
@@ -489,9 +531,13 @@ antidoc: false,
 antictt: false,
 antiloc: false, 
 banchat: true,
-simi: true,
+simih: true,
 modobn: false,
 aluguel: false,
+cooldown: true,
+autosticker: false,
+autodown: false,
+leveling: false,
 listanegra: [], 
 advertir: [],
 antiarquivamento: {
@@ -529,7 +575,52 @@ const isSimih = isGroup ? ArquivosDosGrupos?.[0].simih : undefined
 const isModobn = isGroup ? ArquivosDosGrupos?.[0].modobn : undefined
 const isAluguelAtivo = isGroup ? ArquivosDosGrupos?.[0].aluguel : undefined
 const isAntiArq = isGroup ? ArquivosDosGrupos?.[0].antiarquivamento.ativo : undefined
-//SEMELHANÇA DE COMANDO //
+const isCooldown = isGroup ? ArquivosDosGrupos?.[0].cooldown : undefined
+const isAutoSticker = isGroup ? ArquivosDosGrupos?.[0].autosticker : undefined
+const isAutoDown = isGroup ? ArquivosDosGrupos?.[0].autodown : undefined
+const isLevelingOn = isGroup ? ArquivosDosGrupos?.[0].leveling : undefined
+//====================( FIM CONSTS DE GRUPOS )====================//
+
+//====================( AUTO STICKER )====================//
+if (isAutoSticker && isGroup) {
+async function autofiguf() {
+setTimeout(async () => {
+if (budy.startsWith(prefix)) return;
+if (!isImage && !isVideo) return;
+let packauto = `⚝ ⇝ Grupo:\n${groupName}`;
+let authorauto = `⚝ ⇝ User ⚒${pushname}\n`;
+let boij2 = info.message?.imageMessage ||
+info.message?.viewOnceMessage?.message?.imageMessage ||
+info.message?.viewOnceMessageV2?.message?.imageMessage;
+let boij = info.message?.videoMessage ||
+info.message?.viewOnceMessage?.message?.videoMessage ||
+info.message?.viewOnceMessageV2?.message?.videoMessage;
+try {
+if (boij2) {
+let owgi = await getFileBuffer(boij2, 'image');
+let encmediaa = await sendImageAsSticker2(subaru, from, owgi, info, {
+packname: packauto,
+author: authorauto
+});
+await DLT_FL(encmediaa);
+} else if (boij && boij.seconds < 11) {
+let owgi = await getFileBuffer(boij, 'video');
+let encmedia = await sendVideoAsSticker2(subaru, from, owgi, info, {
+packname: packauto,
+author: authorauto
+});
+await DLT_FL(encmedia);
+}
+} catch (e) {
+console.error("Erro no autosticker:", e);
+}
+}, 100); 
+}
+autofiguf().catch(e => console.error(e));
+}
+
+
+//====================( SIMILARITY / SIMILARIDADE )====================//
 const getallcases = () => {
 findindex = fs.readFileSync("index.js").toString().match(/case\s+'(.+?)'/g)
 cstt = []
@@ -546,6 +637,7 @@ getsmlrt = getSimilarity(allCases, txt)
 if(rmLetras(getsmlrt.nome).includes('nao encontrado')) return [{comando: getsmlrt.nome, porcentagem: getsmlrt.porcentagem}]
 return [{comando: prefix+getsmlrt.nome, porcentagem: Number(getsmlrt.porcentagem).toFixed(1)}]
 }
+//====================( FIM SIMILARITY / SIMILARIDADE )====================//
 
 const identifyAtSign = (number) => {
 const cleanNumber = number.includes('@') ? number.split('@')[1] : number;
@@ -790,6 +882,16 @@ JSON.stringify(countMessage, null, 2) + "\n"
 );
 }
 
+//====================( SISTEMA DO COOLDOWN )====================//
+if (isCooldown && isCmd) {
+if (emCooldown(sender2, from, isGroupAdmins, isDono)) {
+const restante = tempoRestante(sender2, from, isGroupAdmins, isDono).toFixed(1);
+await delay(300, 1000)
+await subaru.sendMessage(from, { text: `⏳ Calma aí ${pushname}, espera ${restante}s pra usar outro comando.`});
+return;
+}}
+//====================( FIM - SISTEMA DO COOLDOWN )====================//
+
 //==========( ABAIXO OS COMANDOS POR FIGURINHA )==========\\
 /* ⚠️LEMBRE SE DE MUDAR O ID DAS FIGURINHAS. ⚠️
 * Use o comando: stickerid para obter o id da figurinha. 
@@ -912,7 +1014,8 @@ buttons: [
 { buttonId: `${prefix}playdoc ${videoInfo.url}`, buttonText: { displayText: '📄 Documento' }, type: 1 }], headerType: 4}, { quoted: seloSz });
 } catch (e) {
 console.log(e);
-reply(`❌ Ocorreu um erro: *_${e.message}_*`)}
+botSemKey(subaru, from);
+}
 return
 }
 
@@ -921,8 +1024,8 @@ if(!isQuotedSticker) return;
 reply2('⏳ Aguarde, processando figurinha...');
 react("😎")
 renameContextSticker3(
-permuteFigPackName(pushname),
-permuteFigAuthorName(null),
+permuteFigPackName(null),
+permuteFigAuthorName(pushname),
 `Figurinha kibada 😎`,
 info
 ).catch((err) => {
@@ -1018,6 +1121,158 @@ console.error(err);
 }
 }}
 
+//====================( SISTEMA DO LEVEL )====================//
+const patentes = JSON.parse(fs.readFileSync("./database/textos/patentes.json"));
+const levelUpMilestones = new Set([100, 200, 300, 400, 500, 600, 700, 800, 900, 1200, 1500, 1800, 2100, 2700, 3300, 3900, 4500, 5000, 5500, 6500, 7500, 9000, 10500, 12000, 13500, 15000, 20000, 25000, 30000, 35000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 150000, 200000, 300000, 400000, 500000, 1000000, 1500000, 2000000, 5000000]);
+const level2 = JSON.parse(fs.readFileSync("./database/users/leveling.json"));
+let user = level2.find(u => u.id === sender);
+if (body && isGroup && isLevelingOn) {
+if (!user) {
+user = {
+id: sender,
+nick: pushname,
+contador: 0,
+level: 1
+};
+level2.push(user); 
+console.log(`Novo usuário [${pushname}] foi registrado no sistema de level.`);}
+user.contador += 1;
+user.nick = pushname;
+const isVeteranLevelUp = user.contador >= 10000000 && user.contador % 1000000 === 0;
+const isNormalLevelUp = levelUpMilestones.has(user.contador);
+if (isNormalLevelUp || isVeteranLevelUp) {
+const oldLevel = user.level;
+user.level += 1;
+const sendLevelUpMessage = async (txe) => {
+try {
+const profilePicUrl = await subaru.profilePictureUrl(sender).catch(() => 'https://i.postimg.cc/C1ZRKCkD/images-23.jpg');
+const buffer = await getBuffer(profilePicUrl);
+const photoUser = await gerarlinkUploadCatbox(buffer).catch(() => 'https://i.postimg.cc/C1ZRKCkD/images-23.jpg');
+const imageUrl = `${baseRaikken}/canvas/rank?nome=${encodeURIComponent(pushname)}&avatar=${photoUser}&nivel=${user.level}&rank=${user.level}&xpAtual=${user.contador}&xpNecessario=0&apikey=${RaikkenKey}`;
+
+await subaru.sendMessage(from, { image: { url: imageUrl }, caption: txe, mentions: [sender]}, { quoted: seloSz })
+} catch (error) {
+console.error("Erro ao enviar mensagem de level up:", error);
+}};
+
+let messageCaption;
+if (isVeteranLevelUp) {
+if (user.contador === 10000000) {
+messageCaption = `🎉 Parabéns *@${sender.split("@")[0]}*, você completou com sucesso 10M de XP, possuindo assim o título de *Veterano 🎩*\n–\n• Todos os níveis daqui pra frente serão contados a cada 1M de XP... Nossa equipe se orgulha de coroar você, depois de tanto esforço e desempenho, após muito tempo de uso de nosso sistemas. ${tempo}!`;
+} else {
+messageCaption = `*🎉 LEGANCY LEVEL UP! 🎖️*\nMeus parabéns querido usuário veterano *@${sender.split("@")[0]}*.\n• Sua experiência acaba de levar a quantidade total de XP à triplicar. Agora você tem *${user.contador} XP*\n–\n*Obs:* Sua patente atual continua sendo a mesma, pois você chegou à maior.`;
+}
+} else {
+const newPatente = patentes.find(p => user.contador >= p.xp).nome;
+messageCaption = `🎉 Parabéns *@${sender.split("@")[0]}*, você acaba de subir de level.\n• Novo level foi alcançado por completar *${user.contador} XP.*\nNova patente desbloqueada, você agora é *${newPatente}*`}
+sendLevelUpMessage(messageCaption);
+}
+fs.writeFileSync("./database/users/leveling.json", JSON.stringify(level2, null, 2));
+}
+
+
+//====================( AUTO DOWNLOAD )====================//
+if (isAutoDown && isGroup) {
+if (body.includes('youtube.com') || body.includes('youtu.be')) {
+reply('Link do youtube detectado, enviarei o áudio.')
+const endpoint = `${baseRaikken}/mp3/url?url=${encodeURIComponent(body)}&apikey=${RaikkenKey}`;
+try {
+const res = await fetch(endpoint);
+const json = await res.json();
+if (!json.status || !json.result?.success) {
+return subaru.sendMessage(from, { text: '❌ Não foi possível obter o áudio. Verifique a URL e tente novamente.' });}
+const title = json.result.data.title;
+const mp3 = json.result.data.downloadUrl;
+
+await subaru.sendMessage(from, {
+audio: { body: mp3 },
+mimetype: 'audio/mp4',
+ptt: false,
+fileName: `${title}.mp3`
+}, { quoted: info });
+} catch (err) {
+console.error('Erro no comando .play:', err);
+await subaru.sendMessage(chat, { text: '⚠️ Erro ao processar o áudio. Tente novamente mais tarde.' });
+}
+}else if( body.includes('instagram.com')) {
+reply2('Link do insta detectado, enviarei o video.')
+try {
+const urlApi = `${baseRaikken}/instagram?url=${encodeURIComponent(body)}&apikey=${RaikkenKey}`;
+const res = await axios.get(urlApi);
+const json = res.data;
+if (!json.status || !json.resultado?.video) { return reply("❌ Não consegui baixar o vídeo. Verifique o link e tente novamente.");}
+const { video, legenda, perfil } = json.resultado;
+const buffer = await getBuffer(video);
+
+await subaru.sendMessage(from, { video: buffer, caption: `🎬 *Reel de:* @${perfil}\n\n📝 ${legenda || "Sem legenda"}\n> ©Andy-Bot v2\n> ${Raikken}`}, { quoted: info });
+} catch (e) {
+reply(`Eu ao baixar video do insta. ${e}`)
+}
+}else if( body.includes('tiktok.com')) {
+reply2('Link do tiktok detectado, enviarei o video.')
+try {
+const res = await fetch(`${baseRaikken}/tiktok-link?url=${encodeURIComponent(body)}&apikey=${RaikkenKey}`);
+const json = await res.json();
+if (!json.status || !json.data || !json.data.length) {
+return enviar("⚠️ Vídeo não encontrado ou inválido.")};
+const videoHD = json.data.find(v => v.type === "nowatermark_hd")?.url || json.data.find(v => v.type === "nowatermark")?.url || json.data[0].url;
+
+const legenda = `
+👤 Autor: ${json.author.nickname} (@${json.author.fullname})
+📆 Postado em: ${json.taken_at}
+📊 Visualizações: ${json.stats.views}
+❤️ Curtidas: ${json.stats.likes}
+🔄 Compartilhamentos: ${json.stats.share}
+
+> ${Raikken}`.trim();
+await subaru.sendMessage(from, {video: { url: videoHD }, caption: legenda, mimetype: 'video/mp4' }, { quoted: info });
+} catch (e) {
+reply(`Erro ao baixar video do tiktok. ${e}`)
+}
+}else if( body.includes('x.com') || body.includes('twitter.com')) {
+reply2('Link do x/twitter detectado, enviarei o video.')
+try {
+const api = `${baseRaikken}/twitter?url=${encodeURIComponent(body)}&apikey=${RaikkenKey}`;
+const res = await axios.get(api);
+const data = res.data;
+if (!data.status) return reply('❌ Não consegui processar o vídeo. Verifique o link.');
+const { desc, HD } = data.resultado;
+await subaru.sendMessage(from, {
+video: { url: HD },
+caption: `🎬 *Twitter/X Downloader*\n\n📝 *Descrição:* ${desc}\n> ${Raikken}`,
+mimetype: 'video/mp4'
+}, { quoted: info});
+} catch (err) {
+console.error(err);
+reply('❌ Erro ao acessar a API ou processar o link.');
+}
+} else if ( body.includes('facebook.com') || body.includes('fb.watch')) {
+reply2('Link do facebook detectado, enviarei o video.')
+try {
+const urlapi = `${baseRaikken}/facebook?url=${encodeURIComponent(body)}&apikey=${RaikkenKey}`;
+const res = await axios.get(urlapi);
+const data = res.data;
+if (!data.status || !data.resultado || !data.resultado.status) {
+return reply('❌ Não consegui processar esse vídeo. Link inválido ou protegido.')}
+const { title, duration, thumbnail, links } = data.resultado;
+const linkHD = links.find(v => v.quality.includes('720'))?.link;
+const linkSD = links.find(v => v.quality.includes('360'))?.link;
+const finalLink = linkHD || linkSD;
+if (!finalLink) return reply('❌ Nenhum link de vídeo encontrado.');
+const buffer = await getBuffer(finalLink); 
+await subaru.sendMessage(from, {
+video: buffer,
+mimetype: 'video/mp4',
+caption: `🎬 *${title}*\n⏱ Duração: ${duration}\n> ${Raikken}`,
+}, { quoted: info });
+} catch (err) {
+console.error(err);
+reply('❌ Erro ao baixar ou enviar o vídeo. Tente novamente.');
+}}
+}
+//====================( FIM AUTODOWNLOAD )====================//
+
+
 //=====( ABAIXO AS FUNÇÕES DOS ANTIS )=====\\
 //Antilink
 if (isAntiLink) {
@@ -1100,6 +1355,7 @@ await subaru.groupParticipantsUpdate(from, [sender || senderLid], 'remove') }
 
 //=====( ABAIXO OS COMANDOS COM PREFIXO )=====\\ 
 const privateCmd = (id, pc, cmd, porcentagem) => {
+try {
 notcmd = `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┓֪࣪
 │ ╭┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╮
 ┃࣪ ┃֪ׅ࣪ׄ᨞⁞❌✿𖥔࣪ *Comando não encontrado!* ❌
@@ -1110,6 +1366,9 @@ notcmd = `┏╾ׁ═╼࡙ᷓ✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ�
 ┃࣪ ╰┈ׅ᳝ׅ𑂳໋֕𔓕᳝ׅ┉۪࣮᪲۟۫─ׅ͚᷂࠭━⵿໋݊┅᮫ׅ᳝۫💀࣭࣪࣪┅⵿᳝۟━໋ׅ࣪࣪─໋͚ׅ۪֘┉᳝ׅ᪲𔓕໋۪࣪┈᩿࣪╯
 ┗╾ׁ═┮✿࡙╾ᷓ═╼֡͜❀⃘໋֢֓🫟⃘໋ᩚ᳕֢֓❀֡͜╾═╼࡙ᷓ✿࡙╾ᷓ═╼┛`
 return notcmd
+} catch (e) {
+console.log(e)
+}
 }
 
 //=====( ABAIXO OS COMANDOS POR PLUGIN )=====\\ 
@@ -1127,8 +1386,49 @@ console.error(`❌ Erro no plugin ${cmd}:`, e);
 try {
 switch (command) {
 
-//=====( ABAIXO OS COMANDOS DE MEMBRO )=====\\
+//=====( ABAIXO OS COMANDOS DE MEMBRO \ MEMBROS )=====\\
 
+case 'take': {
+if (!isQuotedSticker) {return reply('Você usou de forma errada... Marque uma figurinha.')};
+try {
+const i8 = rgtake.findIndex(i => i.usuario === senderLid);
+if (i8 < 0) {
+return reply(`Você ainda não definiu a sua marca ďágua personalizada.\n• Use: *${prefix}rgtake subaru|base*`)}
+await react("✔️");
+const pack = rgtake[i8].mcdagua1;
+const autor = rgtake[i8].mcdagua2;
+const txt = `${pack}|${autor}`;
+await renameContextSticker3(pack, autor, txt);
+await subaru.sendMessage(from, { text: `Renomeado com sucesso para: ${txt}`})
+} catch (error) {
+console.error("Erro no take:", error);
+reply(mss.erro);
+}
+break;}
+
+case 'rgtake': {
+var [TP, TP2] = q.split("|")
+rgtakergtake = []
+for (i of rgtake) {rgtakergtake.push(i.usuario)}
+if(rgtakergtake.indexOf(senderLid) >= 0) return reply("Você já registrou sua marca ďagua, não é possível usar esse comando novamente.")
+if(!TP) return reply(`Você esqueceu de preencher o primeiro campo... Ex: *${prefix + command} Subaru|*`)
+if(!TP2) TP2 = null
+rgtake.push({usuario: senderLid, mcdagua1: TP, mcdagua2: TP2})
+fs.writeFileSync("./database/users/take.json", JSON.stringify(rgtake, null, 2))
+reply(`Sucesso ao concluir o registro... Agora você pode usar o comando: *${prefix}take*`)
+break}
+
+case 'rntake':{
+i8 = rgtake.map(i => i.usuario).indexOf(senderLid)
+if(i8 < 0) return reply(`Como você quer renomear algo que você não tem registro?`)
+var [MARCAD1, MARCAD2] = q.split("|")
+if(!MARCAD1) return reply(`Você esqueceu de preencher o primeiro campo... Ex: *${prefix + command} sb|bot*`)
+if(!MARCAD2) MARCAD2 = null
+rgtake[i8].mcdagua1 = MARCAD1
+rgtake[i8].mcdagua2 = MARCAD2
+fs.writeFileSync("./database/users/take.json", JSON.stringify(rgtake, null, 2) + '\n')
+reply(`Sua marca ďágua foi alterada para *"${MARCAD1}|${MARCAD2}"* com sucesso.`)
+break}
 
 case 'meulid': {
 await subaru.sendMessage(from, { text: `🔎 Debug do seu LID:\n
@@ -1158,8 +1458,7 @@ reply2(`❌ Comando \`${q}\` não encontrado. Use o comando \`${prefix}menu\` pa
 console.log('Erro no comando info:', e);
 reply2('Ocorreu um erro ao buscar as informações do comando.');
 }
-break;
-}
+break;}
 
 case 'afk':
 let motivoFK = q ? q.trim() : 'Sem Motivo Especificado'
@@ -1179,8 +1478,7 @@ return reply('Não há ninguém AFK no momento.')
 for (const key in afkData) {
 if (afkData.hasOwnProperty(key)) {
 listaAFK += `*Número: ${afkData[key].numero.split("@")[0]}*\n*Motivo: ${afkData[key].motivo}*\n\n`
-}
-}
+}}
 reply(listaAFK)
 break
 
@@ -1391,7 +1689,7 @@ if (`${sender.split("@")[0]}` === donoNmr) {
 packin =q ? q?.split("/")[0] : botName
 author23 = q ? q?.split("/")[1] : q?.split("/")[0] ? '' : `♥️ ${donoName}`
 } else {
-packin =q ? q?.split("/")[0] : `${emoji} ⃟𝙱𝚘𝚝: ${botName}\n🤖⃟ 𝙽𝚞𝚖𝚎𝚛𝚘 𝚋𝚘𝚝: ${numeroBot.split('@')[0]}`
+packin =q ? q?.split("/")[0] : ` ⃟𝙱𝚘𝚝: ${botName}\n🤖⃟ 𝙽𝚞𝚖𝚎𝚛𝚘 𝚋𝚘𝚝: ${numeroBot.split('@')[0]}`
 author23 = q ? q?.split("/")[1] : q?.split("/")[0] ? '' : `\n\n👤⃟𝙿𝚎𝚍𝚒𝚍𝚘 𝚙𝚘𝚛: ${pushname}\n👑⃟𝙲𝚛𝚒𝚊𝚍𝚘𝚛: Sz Psico`
 }
 if(boij2){
@@ -2498,6 +2796,32 @@ break
 
 
 //=====( ABAIXO OS COMANDOS DE DONO )=====\\
+case 'reiniciar': {
+if (!isDono) return enviar(mss.dono);
+console.log("Reiniciando sistema.....");
+await enviar(`🔄 Reiniciando o sistema...`);
+await esperar(1000);
+await process.exit(0)
+break;}
+
+case 'checarversao':{
+if (!isDono) {return reply2(mss.dono)}
+await checarVersao(reply2, subaru, from);
+break}
+
+case 'atualizar':{
+if (!isDono) {return reply2(mss.dono)}
+try {
+await atualizarBot(subaru, seloSz, from)
+} catch (e) {
+reply2(`${e.message}`)
+}
+break}
+
+case 'nao-atualizar': {
+if (!isDono) {return reply2(mss.dono)}
+await reply("Poxa, que pena que não quer atualizar, mas tudo bem! Qualquer coisa, só usar o comando de novo ou simplesmente ir no diretório: https://github.com/andy-botkkj/Subaru-Base")
+break}
 
 case 'listatz': {
 if (!isGroup) return enviar("Este comando só funciona em grupos.");
@@ -2607,7 +2931,6 @@ subaru.sendMessage(from, { text: successMessage, mentions: [targetJidAdd] }, { q
 }
 break;
 }
-
 
 case 'aluguel':
 if (!isDono) return reply(mss.dono); 
@@ -3060,12 +3383,12 @@ if(!isGroup) return reply(mss.grupo)
 if(!isDono) return reply("Somente dono")
 if(q.length < 1) return enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
 if(Number(q[0]) === 1) {
-if(isBanchat) return enviar('_Isso já está ativo, senhor._')
+if(isBanchat) return enviar('_O Bot já está desativado do chat, senhor._')
 ArquivosDosGrupos[0].banchat = true
 ModificaGrupo(ArquivosDosGrupos)
 enviar(`*_O bot foi desativo desse grupo. Apenas o ${donoNmr} pode desbanir._*.`)
 } else if(Number(q[0]) === 0) {
-if(!isBanchat) return enviar('já ta off 😪')
+if(!isBanchat) return enviar('O Bot tá online!')
 ArquivosDosGrupos[0].banchat = false
 ModificaGrupo(ArquivosDosGrupos)
 enviar('*_O bot foi ativado com sucesso nesse grupo!!_*')
@@ -3165,7 +3488,10 @@ const funcoes = [
 { nome: "Anti-Contato", status: isAntiCtt, id: `${prefix}antictt` },
 { nome: "Anti-Localização", status: isAntiLoc, id: `${prefix}antiloc` },
 { nome: "Modo Brincadeiras", status: isModobn, id: `${prefix}modobn` },
-{ nome: "Simsimi (IA)", status: isSimih, id: `${prefix}simih` }
+{ nome: "Simsimi (IA)", status: isSimih, id: `${prefix}simih` },
+{ nome: "Auto Download", status: isAutoDown, id: `${prefix}autodl` },
+{ nome: "Sistema Level", status: isLevelingOn, id: `${prefix}level` },
+{ name: "Auto sticker", status: isAutoSticker, id: `${prefix}autosticker` }
 ];
 
 const rows = funcoes.map(func => ({
@@ -3370,6 +3696,66 @@ if(!isModobn) return enviar('Isso já ta off 😪')
 ArquivosDosGrupos[0].modobn = false
 ModificaGrupo(ArquivosDosGrupos)
 enviar('*_A função de brincadeiras foi desativada com sucesso nesse grupo 😋_*')
+} else {
+enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
+}
+break
+
+case 'autosticker':
+if(!isGroup) return reply(mss.grupo)
+if(!isGroupAdmins) return reply(mss.adm)
+if(!isBotGroupAdmins) return reply(mss.botadm)
+if(q.length < 1) return enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
+if(Number(q[0]) === 1) {
+if(isAutoSticker) return enviar('_Isso já está ativo, senhor._')
+ArquivosDosGrupos[0].autosticker = true
+ModificaGrupo(ArquivosDosGrupos)
+enviar('*_A função de auto sticker foi ativada com sucesso nesse grupo 😋_*.')
+} else if(Number(q[0]) === 0) {
+if(!isAutoSticker) return enviar('Isso já ta off 😪')
+ArquivosDosGrupos[0].autosticker = false
+ModificaGrupo(ArquivosDosGrupos)
+enviar('*_A função de auto sticker foi desativada com sucesso nesse grupo 😋_*')
+} else {
+enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
+}
+break
+
+case 'autodl':
+if(!isGroup) return reply(mss.grupo)
+if(!isGroupAdmins) return reply(mss.adm)
+if(!isBotGroupAdmins) return reply(mss.botadm)
+if(q.length < 1) return enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
+if(Number(q[0]) === 1) {
+if(isAutoDown) return enviar('_Isso já está ativo, senhor._')
+ArquivosDosGrupos[0].autodown = true
+ModificaGrupo(ArquivosDosGrupos)
+enviar('*_A função de auto download foi ativada com sucesso nesse grupo 😋_*.')
+} else if(Number(q[0]) === 0) {
+if(!isAutoDown) return enviar('Isso já ta off 😪')
+ArquivosDosGrupos[0].autodown = false
+ModificaGrupo(ArquivosDosGrupos)
+enviar('*_A função de auto download foi desativada com sucesso nesse grupo 😋_*')
+} else {
+enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
+}
+break
+
+case 'level':
+if(!isGroup) return reply(mss.grupo)
+if(!isGroupAdmins) return reply(mss.adm)
+if(!isBotGroupAdmins) return reply(mss.botadm)
+if(q.length < 1) return enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
+if(Number(q[0]) === 1) {
+if(isLevelingOn) return enviar('_Isso já está ativo, senhor._')
+ArquivosDosGrupos[0].leveling = true
+ModificaGrupo(ArquivosDosGrupos)
+enviar('*_O sistema de levels foi ativada com sucesso nesse grupo 😋_*.')
+} else if(Number(q[0]) === 0) {
+if(!isLevelingOn) return enviar('Isso já ta off 😪')
+ArquivosDosGrupos[0].leveling = false
+ModificaGrupo(ArquivosDosGrupos)
+enviar('*_O sistema de levels foi desativada com sucesso nesse grupo 😋_*')
 } else {
 enviar(`${prefix + cmd} 1 para ativar, 0 para desativar.`)
 }
@@ -3876,40 +4262,236 @@ reply(`Deu erro, se liga:\n *_${e.message}_*`);
 }
 break
 
-case 'marcar2':
-if (!isDono && !isAdm) {return enviar(msg.adm);}
-if (!isGroup) return enviar(msg.grupo);
-if (!isBotGroupAdmins) return enviar(msg.botadm) 
-async function marcac() {
-try {
-let groupMetadata = await getGroupMetadataSafe(from); 
-let groupMembers = groupMetadata.participants; 
-let somembros = groupMembers
-.filter(member => !member.admin) 
-.map(member => member.id);
-
-if (somembros.length === 0) {
-return reply(`❌ Olá *${pushname}* - Não contém nenhum membro comum no grupo, apenas administradores.`);}
-let blad = `• Mencionando os membros comuns do grupo.\n\n‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎
-`;
-let bla = [];
-for (let membro of somembros) {
-blad += `» @${membro.split("@")[0]}\n`;
-bla.push(membro);}
-
-subaru.sendMessage(from, { text: blad, mentions: bla });
-} catch (e) {
-console.error("Erro ao mencionar membros:", error);
-reply(`Deu erro, se liga:\n *_${e.message}_*`);
-}
-}
-marcac().catch(e => {
-console.log(e)
-})
-break
-
 //=====( ABAIXO OS COMANDOS DA API )=====\\
+case 'namorar': {
+
+if (!alvo) return reply("💔 Você precisa marcar alguém para pedir em namoro.");
+if (alvo === sender2) return reply("😂 Você não pode namorar com você mesmo!");
+if (botNumber.includes(alvo)) return reply("😳 Eu sou apenas um bot, não posso namorar!");
+const familia = await getFamiliaData(sender2);
+if (familia && familia.parceiro) {
+const parceiroAtual = familia.parceiro.parceiroId || familia.parceiroId
+const nomeExibicao = parceiroAtual.replace('@lid', ''); 
+const tipoRelacionamento = familia.parceiro.tipo.toLowerCase();
+await mentions(`💞 Você já está em um relacionamento (${tipoRelacionamento}) com @${nomeExibicao}. Não é possível pedir outra pessoa em namoro.`, [parceiroAtual]);
+await subaru.sendMessage(parceiroAtual, { text: `🐂 ALERTA! Seu parceiro @${sender2.split("@")[0]} está tentando pedir @${alvo.split("@")[0]} em namoro pelas suas costas!`, mentions: [sender2, parceiroAtual] });
+return;
+}
+try {
+const res = await fetch(`${baseRaikken}/familia/namorar?apikey=${RaikkenKey}`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo })
+});
+const data = await res.json();
+if (!data || !data.mensagem) throw new Error("Resposta inválida da API.");
+const mensagemOriginal = data.mensagem.replace(/@lid/g, '');
+const [id1, id2] = mensagemOriginal.match(/\d+/g);
+const msgFormatada = `💞 Novo casal formado!\n@${id1} 💍 @${id2}\n💘 Que o amor de vocês dure para sempre!`;
+await mentions(msgFormatada, [sender2, alvo]);
+} catch (e) {
+console.error("Erro no namoro:", e);
+await botSemKey(subaru, from) 
+}
+break}
+
+case 'casar': {
+
+if (!alvo) return reply("💍 Você precisa marcar com quem deseja casar.");
+if (alvo === sender2) return reply("😂 Você não pode casar com você mesmo!");
+if (botNumber.includes(alvo)) return reply("😳 Casar com um bot? Que ideia maluca!");
+const familia = await getFamiliaData(sender2);
+if (!familia || !familia.parceiro) {
+return reply("💔 Para casar, você primeiro precisa estar em um namoro.");
+}
+const parceiroAtual = familia.parceiro.parceiroId;
+const nomeExibicao = parceiroAtual.replace('@lid', ''); 
+const tipoRelacionamento = familia.parceiro.tipo;
+if (tipoRelacionamento === 'Casamento') {
+return mention(`💞 Você já está casado(a) com @${parceiroAtual}!`);
+}
+if (alvo !== parceiroAtual) {
+await mentions(`Sua dupla é o/a @${nomeExibicao}... Fica esperto em 🐂`, [parceiroAtual] );
+await subaru.sendMessage(parceiroAtual, { text: `🐂 ALERTA! Seu namorado(a) @${sender2.split("@")[0]} está tentando pedir @${alvo.split("@")[0]} em CASAMENTO!`, mentions: [sender2, alvo] });
+return;
+}
+try {
+const res = await fetch(`${baseRaikken}/familia/casar?apikey=${RaikkenKey}`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo })
+});
+const data = await res.json();
+if (!data || !data.mensagem) throw new Error("Resposta inválida da API.");
+const mensagemOriginal = data.mensagem.replace(/@lid/g, '');
+const [id1, id2] = mensagemOriginal.match(/\d+/g);
+const msgFormatada = `💞 Mais um passo dado!\n@${id1} 💍 @${id2}\n💘 Que o amor de vocês dure para sempre!`;
+await mentions(msgFormatada, [sender2, alvo]);
+} catch (e) {
+console.log(e);
+botSemKey(subaru, from);
+}
+}
+break;
+
+case 'divorciar':
+case 'terminar': {
+
+if (args[0] !== '1') { return reply(`Tem certeza? Para confirmar o fim do relacionamento, use: *${prefix}${command} 1*`)}
+const familia = await getFamiliaData(sender2);
+if (!familia || !familia.parceiro) {
+return reply("💔 Você não está em um relacionamento para poder terminar.");}
+const parceiroId = familia.parceiro.parceiroId;
+const endpoint = familia.parceiro.tipo === 'Casamento' ? 'divorciar' : 'terminar';
+try {
+const res = await fetch(`${baseRaikken}/familia/divorciar?apikey=${RaikkenKey}`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ usuarioId: sender2, parceiroId: parceiroId })
+});
+const data = await res.json();
+if (!data || !data.mensagem) throw new Error("Resposta inválida da API.");
+await mentions(data.mensagem, [sender2, alvo]);
+} catch (e) {
+console.log(e);
+botSemKey(subaru, from);
+}
+}
+break;
+
+case 'addamante': {
+
+if (!alvo) return reply("😏 Você precisa marcar quem será seu/sua amante.");
+if (alvo === sender2) return reply("😂 Ter um caso com você mesmo? Interessante...");
+const familia = await getFamiliaData(sender2);
+if (familia && familia.parceiro) {
+const parceiroAtual = familia.parceiro.parceiroId;
+await reply("🤫 Cuidado... Brincar com fogo pode te queimar...");
+await subaru.sendMessage(parceiroAtual, { text: `🐂 ALERTA DE CORNO! Seu parceiro @${sender2.split("@")[0]} acabou de adicionar @${alvo.split("@")[0]} como amante!`, mentions: [sender2, alvo] })}
+try {
+const res = await fetch(`${baseRaikken}/familia/amante?apikey=${RaikkenKey}`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo })
+});
+const data = await res.json();
+if (!data || !data.mensagem) throw new Error("Resposta inválida da API.");
+const mensagemOriginal = data.mensagem.replace(/@lid/g, '');
+const [id1, id2] = mensagemOriginal.match(/\d+/g);
+const msgFormatada = `🫦 Eita, uma amante na relação? !\n@${id1} 💍 @${id2}\n💋 Que o amor de vocês sobreviva o caos`;
+await mentions(msgFormatada, [sender2, alvo]);} catch (e) {
+console.log(e);
+botSemKey(subaru, from);
+}
+}
+break;
+
+case 'familia': {
+
+const usuarioConsultado = sender2 || alvo
+
+try {
+const familia = await getFamiliaData(usuarioConsultado);
+if (!familia) return reply("Este usuário não possui uma árvore genealógica registrada.");
+
+const { parceiro, filhos, amantes, historico } = familia;
+let msg = `🌳 Árvore Familiar de @${usuarioConsultado.split('@')[0]}\n\n`;
+
+if (parceiro && parceiro.desde) {
+const dataInicio = new Date(parceiro.desde); 
+const hoje = new Date();
+const diffTempo = Math.abs(hoje - dataInicio);
+const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+const anosJuntos = Math.floor(diffDias / 365);
+const mesesJuntos = Math.floor((diffDias % 365) / 30);
+const diasRestantes = (diffDias % 365) % 30;
+let tempoJuntos = `⏳ Juntos há: `;
+if (anosJuntos > 0) tempoJuntos += `${anosJuntos} ano(s) `;
+if (mesesJuntos > 0) tempoJuntos += `${mesesJuntos} mês(es) `;
+if (diasRestantes > 0) tempoJuntos += `${diasRestantes} dia(s)`;
+msg += `${tempoJuntos.trim()}\n`;
+const dia = dataInicio.getDate();
+const mes = dataInicio.getMonth() + 1;
+const ano = dataInicio.getFullYear();
+if (hoje.getDate() === dia && hoje.getMonth() + 1 === mes) {
+if (anosJuntos > 0) msg += `\n🎂 FELIZ ANIVERSÁRIO DE ${anosJuntos} ANO(S)! 🎉\n`;
+} else {
+const mesesTotais = (hoje.getFullYear() - ano) * 12 + (hoje.getMonth() + 1 - mes);
+if (mesesTotais > 0) msg += `\n💖 FELIZ ${mesesTotais} MESES JUNTOS! ✨\n`;
+}
+msg += "\n";
+} else {
+msg += "💞 Nenhum parceiro ativo.\n\n";
+}
+
+msg += filhos?.length ? `👶 Filhos:\n${filhos.map(f => `• ${f.nome.replace('@lid', '')} (${f.idade} anos)`).join("\n")}\n\n` : "👶 Nenhum filho registrado.\n\n";
+msg += amantes?.length ? `😏 Amantes:\n${amantes.map(a => `• @${a.amanteId.replace('@lid', '')}`).join("\n")}\n\n` : "😏 Nenhum amante ativo.\n\n";
+msg += "📜 Histórico:\n" + (historico?.length ? historico.map(h => `• ${h.tipo} com @${h.parceiroId.replace('@lid', '')} (${h.status})`).join("\n") : "Nenhum histórico.");
+const membrosParaMencionar = [
+usuarioConsultado,
+...(parceiro ? [parceiro.parceiroId] : []),
+...(filhos?.map(f => f.id) || []),
+...(amantes?.map(a => a.amanteId) || [])];
+
+await mentions(msg, membrosParaMencionar);
+} catch (e) {
+console.log(e);
+botSemKey(subaru, from);
+}
+}
+break;
+
+case 'terfilho': {
+
+if (!alvo || !q) return reply("👶 Use: *.filho @pessoa NomeDoFilho*");
+const nomeFilho = q.trim();
+try {
+const res = await fetch(`${baseRaikken}/familia/filho?apikey=${RaikkenKey}`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ usuarioId: sender2, parceiroId: alvo, nomeFilho })
+});
+const data = await res.json();
+await reply(`🍼 ${data.mensagem || "Erro desconhecido."}`);
+} catch (e) {
+console.log(e);
+botSemKey(subaru, from);
+}
+}
+break;
+
+case 'listaramantes': {
+
+try {
+const res = await fetch(`${baseRaikken}/familia/amantes/${sender2}?apikey=${RaikkenKey}`);
+const data = await res.json();
+if (!data.sucesso || !data.dados.length) return reply("😏 Nenhum amante encontrado.");
+const lista = data.dados.map((a, i) => `• ${i + 1}. ${a.amanteId} (desde ${a.desde})`).join("\n");
+await reply(`💋 *Lista de Amantes de ${sender2}:*\n\n${lista}`);
+} catch (e) {
+console.log(e);
+botSemKey(subaru, from);
+}
+}
+break;
+
+case 'filhos': {
+
+try {
+const res = await fetch(`${baseRaikken}/familia/filhos/${sender2}?apikey=${RaikkenKey}`);
+const data = await res.json();
+if (!data.sucesso || !data.dados.length) return reply("👶 Nenhum filho encontrado.");
+const lista = data.dados.map((f, i) => `• ${i + 1}. ${f.nome} (${f.idade} anos)`).join("\n");
+await reply(`🍼 *Filhos de ${sender2}:*\n\n${lista}`);
+} catch (e) {
+console.log(e);
+botSemKey(subaru, from);
+}
+}
+break;
+
 case 'play': {
+
 if (!q) return reply('Digite o nome da música ou cole o link do YouTube!');
 try {
 let result;
@@ -3948,10 +4530,12 @@ await subaru.sendMessage(from, { image: { url: result.thumb }, caption }, { quot
 await subaru.sendMessage(from, { audio: { url: result.download }, mimetype: 'audio/mpeg', fileName: `${result.titulo}.mp3`, ptt: false }, { quoted: info });
 } catch (e) {
 console.log(e);
-reply(`Ocorreu um erro ao buscar a música. Erro: *_${e.message}_*`)}
+botSemKey(subaru, from);
+}
 break;}
 
 case 'playdoc': {
+
 if (!q || !q.startsWith('http')) {
 return reply('❌ Link do YouTube inválido ou não fornecido. Use o comando .playb para buscar uma música.')}
 reply2('📥 Buscando informações do áudio, aguarde...');
@@ -3973,11 +4557,12 @@ fileName: `${tituloMusica}.mp3`
 
 } catch (e) {
 console.error('Erro no comando .playdoc:', e);
-reply(`⚠️ Ocorreu um erro ao processar sua solicitação: ${e.message}`);
+botSemKey(subaru, from);
 }
 break;}
 
 case 'playvideo': {
+
 try {
 if (!q) {return reply(`❌ Use: ${prefix + command} <link do YouTube>`)}
 let url = `https://raikken-api.speedhosting.cloud/api/playvideo?url=${encodeURIComponent(q)}&qualidade=480&apikey=${RaikkenKey}`
@@ -4003,12 +4588,13 @@ let msgg = `
 await subaru.sendMessage(from, { video: { url: result.url }, caption: msgg }, { quoted: seloSz })
 } catch (e) {
 console.error(e)
-reply("❌ Erro ao processar o vídeo.")
+botSemKey(subaru, from);
 }
 break}
 
 case 'down':
 case 'dl':{
+
 try {
  const url = args[0];
  const Raikken = "Raikken"
@@ -4145,12 +4731,13 @@ console.error(err);
 reply('❌ Erro ao baixar ou enviar o vídeo. Tente novamente.');
 }}
 } catch (e) {
-reply(`Erro na case de DL. ${e}`)
+botSemKey(subaru, from);
 }
 }
 break;
 
 case 'facebook': {
+
 if (!q) return reply('📌 Envie o link de um vídeo do Facebook.\n\nExemplo:\n.facebook https://www.facebook.com/...');
 
 try {
@@ -4178,12 +4765,13 @@ caption: `🎬 *${title}*\n⏱ Duração: ${duration}`,
 
 } catch (err) {
 console.error(err);
-reply(`❌ Erro ao baixar ou enviar o vídeo. Tente novamente. ${err}`);
+botSemKey(subaru, from);
 }
 }
 break;
 
 case 'twitter': {
+
 if (!q) return reply('❗ Envie o link do post do Twitter/X.\n\nExemplo:\n.twitter https://x.com/usuario/status/123456');
 
 try {
@@ -4202,12 +4790,13 @@ mimetype: 'video/mp4'
 
 } catch (err) {
 console.error(err);
-reply('❌ Erro ao acessar a API ou processar o link.');
+botSemKey(subaru, from);
 }
 }
 break;
 
 case 'gemini': {
+
 if (!sz) return reply(`💬 Envie uma pergunta para o Gemini responder.\n\nExemplo:\n${prefixo}gemini Quem descobriu o Brasil?`);
 waitReact()
 try {
@@ -4219,11 +4808,12 @@ return reply("❌ Não consegui obter resposta do Gemini.");}
 return reply(`🤖 *Resposta do Gemini:*\n\n${res.data.resultado}`);
 } catch (err) {
 console.error("Erro ao chamar Gemini:", err);
-return reply("❌ Ocorreu um erro ao se comunicar com o Gemini.");
+botSemKey(subaru, from);
 }
 break;}
 
 case 'gpt': {
+
 if (!sz) return reply(`💬 Envie uma pergunta para a IA responder.\n\nExemplo:\n${prefixo}ia O que é buraco negro?`);
 waitReact()
 try {
@@ -4236,7 +4826,7 @@ if (!res.data?.status || !res.data?.resultado) return reply("❌ Erro ao process
 await reply(`💡 *Resposta da IA:*\n\n${res.data.resultado}`);
 } catch (err) {
 console.error("Erro na IA =>", err);
-reply("❌ Ocorreu um erro ao falar com a IA. Tente novamente mais tarde.");
+botSemKey(subaru, from);
 }
 
 break;
@@ -4244,6 +4834,7 @@ break;
  
  
 case 'printsite': {
+
 if (!sz) return reply(`🌐 Envie o link de um site para tirar print.\n\nExemplo:\n${prefixo}printsite https://google.com`);
 
 try {
@@ -4263,6 +4854,7 @@ reply("❌ Erro ao tirar print do site. Verifique o link e tente novamente.");}
 break;}
 
  case 'insta': {
+ 
 if (!sz) return reply(`📷 Envie o link do vídeo do Instagram.\nExemplo:\n${prefixo}insta https://www.instagram.com/reel/xxxxx`);
 await waitReact();
 
@@ -4278,11 +4870,13 @@ await subaru.sendMessage(from, { video: buffer, caption: `🎬 *Reel de:* @${per
 
 } catch (err) {
 console.error("Erro Insta =>", err);
-reply("❌ Erro ao processar o vídeo do Instagram.");}
+botSemKey(subaru, from);
+}
 break;}
  
  
 case 'pinterest': {
+
 if (!sz) return reply(`📌 Envie o termo da pesquisa. Exemplo:\n${prefixo}pinterest naruto 5`);
 
 await reply('⏳ Buscando imagens no Pinterest...');
@@ -4328,6 +4922,7 @@ merchant_url: `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(que
 
 } catch (err) {
 console.error(`[❌] Erro ao buscar imagem ${count + 1}:`, err.message || err);
+botSemKey(subaru, from);
 }
 }
 
@@ -4363,6 +4958,7 @@ break;
 }
 
 case 'ttk': {
+
 if (!q) return enviar("🚫 Envie o link de um vídeo do TikTok.");
 await waitReact();
 try {
@@ -4393,10 +4989,12 @@ const legenda = `
 await subaru.sendMessage(from, {video: { url: videoHD }, caption: legenda, mimetype: 'video/mp4' });
 } catch (e) {
 console.error(e);
-enviar("❌ Erro ao obter dados do TikTok. Verifique o link e tente novamente.")} 
+botSemKey(subaru, from);
+} 
 break;}
 
 case 'tksrc': {
+
 if (!q) return enviar("🚫 Insira o nome ou termo para pesquisar vídeos no TikTok.");
 await waitReact();
 try {
@@ -4409,7 +5007,7 @@ const linkAleatorio = lista[Math.floor(Math.random() * lista.length)];
 await subaru.sendMessage(from, { video: { url: linkAleatorio }, caption: `🎵 *TikTok Source*\n🔎 Termo: ${q}\n🌐`
 }, { quoted: info});
 } catch (e) {
-enviar("❌ Ocorreu um erro ao buscar os vídeos.");
+botSemKey(subaru, from);
 }
 break;
 }
@@ -4663,6 +5261,7 @@ reply(errorMessage);
 break
 
 case 'stalkinsta':{
+
 if (!q) {return reply(`Cadê o usuário?\n\nExemplo de uso:\n${prefix}stalkinsta @raikkenapi`)}
 react('🫟')
 try {
@@ -4691,11 +5290,13 @@ await subaru.sendMessage(from, { image: { url: perfil.avatar }, caption: txt}, {
 
 } catch (e) {
 console.error(e)
-await subaru.sendMessage(from, { text: `>┃ ❌ *Erro ao consultar API.*` }, { quoted: msg })}
+botSemKey(subaru, from);
+}
 }
 break
 
 case 'stalkttk': {
+
 if (!q) {return reply(`Qual o usuário?\n\nExemplo de uso:\n${prefix}stalkttk _doofy.sz`) }
 react('🫟')
 try {
@@ -4720,11 +5321,13 @@ await subaru.sendMessage(from, { image: { url: perfil.avatar|| defaultAvatar },c
 
 } catch (e) {
 console.error(e)
-return reply(`> ┃ ❌ *Erro ao consultar API. Verifique o nome de usuário*`) }
+botSemKey(subaru, from);
+}
 }
 break
 
 case 'stalkyt':{
+
 if (!q) {return reply(`Qual o usuário?\n\nExemplo de uso:\n${prefix}stalkyt lilgiela33`) }
 react('🫟')
 try {
@@ -4762,11 +5365,13 @@ await subaru.sendMessage(from, { text: `📺 Últimos vídeos:\n${ultimos}` }, {
 
 } catch (e) {
 console.error(e)
-reply(`> ┃ ❌ *Erro ao consultar API.*`) }
+botSemKey(subaru, from);
+}
 }
 break
 
 case 'stalkff': {
+
 react('🫟')
 if (!q) return reply("❌ Informe o *ID do jogador*!"); 
 try {
@@ -4796,7 +5401,7 @@ let texto = `
 await subaru.sendMessage(from, { image: { url: defaultAvatar }, caption: texto.trim()}, { quoted: info });
 } catch (e) {
 console.error(e);
-reply("⚠️ Erro ao buscar perfil Free Fire!");
+botSemKey(subaru, from);
 }
 }
 break;
@@ -4805,15 +5410,18 @@ break;
 default:
 
 if(isCmd) {
+try {
 setTimeout(() => {react("🔴")}, 1000)
 AB = similarityCmd(command)
 notcmd = privateCmd(sender, prefix+command, AB[0].comando, AB[0].porcentagem)
 mention(notcmd, groupMemb2)
-}
+} catch (e) {
+console.log(e)
+}}
 
 }} catch (error) {
 console.error(`Erro ao processar o comando '${command}':`, error);
-await reply(`Ocorreu um erro ao executar este comando. 😟\n\n_Erro: ${error.message}_`);
+if (!botSemKey(subaru, from)) return
 }
 } // aqui fecha o else
 
