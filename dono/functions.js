@@ -5,7 +5,7 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage } = require("baileys")
+const { default: makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage } = require("baron-baileys-v2")
 
 const { prefix, donoName, donoNmr, donoLid, botNumber, baseVersion, baseRaikken, RaikkenKey } = require('./configs/settings.json')
 const fs = require('fs');
@@ -19,6 +19,7 @@ const plugins = new Map();
 const NodeCache = require('node-cache');
 moment.locale("pt");
 const sendHours = (formato) => moment.tz('America/Sao_Paulo').format(formato);
+const scget = require("scget");
 
 
 
@@ -181,24 +182,21 @@ return link.trim()
 }
 
 //============( GETBUFFER )===========\\
-const getBuffer = async (url, options) => {
+const getBuffer = async (url) => {
 try {
-options ? options : {}
-const res = await axios({
-method: "get",
-url,
+const response = await scget(url, {
 headers: {
-'DNT': 1,
-'Upgrade-Insecure-Request': 1
+"user-agent":
+"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36",
+DNT: 1,
+"Upgrade-Insecure-Request": 1,
 },
-...options,
-responseType: 'arraybuffer'
-})
-return res.data
-} catch (err) {
-return err
+});
+return response.arrayBuffer();
+} catch (erro) {
+console.log(`Erro identificado: ${erro}`);
 }
-}
+};
 
 //============( FETCHJSON )===========\\
 async function fetchJson (url, options) {

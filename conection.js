@@ -5,14 +5,14 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType, makeCacheableSignalKeyStore, cacheService } = require("baileys");
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType, makeCacheableSignalKeyStore, cacheService } = require("baron-baileys-v2");
 const fs = require('fs')
 const pino = require("pino");
 const chalk = require('chalk')
 const path= require('path')
 const readline = require("readline");
 const NodeCache  = require('node-cache');
-const LoggerB = require('baileys/lib/Utils/logger').default;
+const LoggerB = require('baron-baileys-v2/src/Utils/logger').default;
 const logger = LoggerB.child({});  
 logger.level = 'silent';  
 const { escolherPersonalidadeSubaru, escolherVideoPorRota, getFileBuffer, checkPrefix, fetchJson, getBuffer, data, hora, sincronizarCases, esperar, groupConfigCache, delay, getRandomSaudacao } = require('./dono/functions.js')
@@ -120,6 +120,7 @@ const startConnection = async () => {
     try {
     if (type !== "notify" || !msg.message || msg.key.remoteJid === "status@broadcast") {return; }
     if (!msg.message) {return; }
+    if (msg?.WebMessageInfo) return;
     const info = msg 
     var body = info.message?.conversation || info.message?.viewOnceMessageV2?.message?.imageMessage?.caption || info.message?.viewOnceMessageV2?.message?.videoMessage?.caption || info.message?.imageMessage?.caption || info.message?.videoMessage?.caption || info.message?.extendedTextMessage?.text || info.message?.viewOnceMessage?.message?.videoMessage?.caption || info.message?.viewOnceMessage?.message?.imageMessage?.caption || info.message?.documentWithCaptionMessage?.message?.documentMessage?.caption || info.message?.buttonsMessage?.imageMessage?.caption || info.message?.buttonsResponseMessage?.selectedButtonId || info.message?.listResponseMessage?.singleSelectReply?.selectedRowId || info.message?.templateButtonReplyMessage?.selectedId || info?.text || ""
     const from = msg.key.remoteJid || msg.key.remoteLid || msg.key.participantAlt;    
@@ -201,14 +202,15 @@ const startConnection = async () => {
     const { id, action, participants } = update;
     const groupSettingsPath = `./database/grupos/${id}.json`;   
     if (!fs.existsSync(groupSettingsPath)) return;
-    try {
-      const groupSettings = getGroupConfig(id);
+       const groupSettings = getGroupConfig(id);
        if (!groupSettings) return;
       const welcomeConfig = groupSettings[0]?.bemVindo?.[0];
       if (!welcomeConfig?.ativo) return;
       const groupMetadata = await getGroupMetadataSafe(id, subaru);
       const groupName = groupMetadata.subject;
       const member = participants[0];
+    try {
+      wel = getBuffer(well)
       let textinh = "";
       if (action === "add" && welcomeConfig.entrou) {
         textinh = welcomeConfig.entrou
@@ -225,7 +227,7 @@ const startConnection = async () => {
          title: `Meu prefixo: ${prefix}`,
          body: '',
          previewType: "PHOTO",
-         thumbnailUrl: well,
+         thumbnailUrl: wel,
          mediaType: 1,
          mediaUrl: 'https://raikken-api.speedhosting.cloud/',
          sourceUrl: 'https://raikken-api.speedhosting.cloud/'}}});

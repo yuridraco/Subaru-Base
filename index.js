@@ -8,7 +8,7 @@
 */
 
 /* ===========================//CONSTS\\================================//*/
-const { default:makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys, cacheService } = require("baileys");
+const { default:makeWASocket, DissubaruectReason, useMultiFileAuthState,fetchLatestBaileysVersion, isJidBroadcast, isJidStatusBroadcast, proto, makeInMemoryStore, makeCacheableSignalKeyStore, PHONENUMBER_MCC, downloadContentFromMessage, relayWAMessage, mentionedJid, processTime, MediaType, Browser, MessageType, Presence, Mimetype, Browsers, getLastMessageInChat, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, downloadAndSaveMedia, logger, getContentType, INativeFlowMessage, messageStubType, WAMessageStubType, BufferJSON, generateWAMessageContent, downloadMediaMessage, prepareWAMessageMedia, baileys, cacheService } = require("baron-baileys-v2");
 
 const { os, fs, path, exec, spawn, crypto, axios, fetch, FormData, cheerio, moment, mss, sendPoll, imageToWebp, videoToWebp, writeExifImg, writeExifVid, imageToWebp2, videoToWebp2, writeExifImg2, writeExifVid2, getMembros, getAdmins, util, rgtake, botSemKey } = require('./dono/exports-consts.js')
 
@@ -134,7 +134,7 @@ return `${id}@s.whatsapp.net`;
 };
 
 function getSenderLid(msg) {
-const { jidDecode, jidEncode } = require('baileys');
+const { jidDecode, jidEncode } = require('baron-baileys-v2');
 try {
 const sender = msg?.key?.participant || msg?.key?.remoteJid || msg?.key?.remoteLid || msg?.key?.participantLid || msg?.key?.participantAlt || '';
 const user = jidDecode(sender)?.user || sender.split('@')[0] || '';
@@ -169,10 +169,8 @@ senderJid = participant;
 senderJid = info.key.remoteJid;
 }
 
-const senderObject = groupMembers.find(member => member.jid === sender);
-let senderLid = null
-if (senderObject) {
-senderLid = senderObject.lid || senderObject.id || null}
+const senderObject = groupMembers.find(member => member.jid === sender || member.id === sender || member.lid === sender);
+let senderLid = senderObject ? senderObject.lid || senderObject.id : null;
 const sender2 = senderLid || senderJid
 const isCmd = content.startsWith(prefix)
 const cmd = isCmd ? content.slice(1).trim().split(/ +/).shift().toLocaleLowerCase() : null
@@ -1019,6 +1017,55 @@ botSemKey(subaru, from);
 return
 }
 
+async function sendUrlText(
+id,
+textCaption,
+title,
+desc,
+imageUrl,
+linkAcess,
+quotedThis
+) {
+await subaru.sendMessage(
+id,
+{
+text: textCaption,
+contextInfo: {
+externalAdReply: {
+title: title,
+body: desc,
+thumbnail: await getBuffer(imageUrl),
+mediaType: 1,
+sourceUrl: linkAcess,
+},
+},
+},
+{ quoted: quotedThis }
+);
+}
+
+if (body === "prefixo2") {
+subaru.sendMessage(from, { react: { text: `🙂‍↔`, key: info.key } });
+try {
+ppimg = await subaru.profilePictureUrl(
+`${senderJid.split("@")[0]}@s.whatsapp.net`,
+"image"
+);
+} catch {
+ppimg = "https://i.postimg.cc/J0jC8w1f/perfil.jpg";
+}
+prefixmsg2 = `> *Olá! Esse é meu Prefixo:『 ${prefix} 』*`;
+sendUrlText(
+from,
+prefixmsg2,
+botName,
+`${hora}, ${pushname}`,
+ppimg,
+`Subaru-Base `,
+info
+);
+}
+            
 if (body.toLowerCase().includes(`💀`)) {
 if(!isQuotedSticker) return;
 reply2('⏳ Aguarde, processando figurinha...');

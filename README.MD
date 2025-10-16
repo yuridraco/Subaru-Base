@@ -54,7 +54,16 @@
 ### Baixe o bot
 📦 [Download direto V1 (MEGA)](https://mega.nz/file/3DxTWBqA#sAYDC5Xvy-oYMuXYAAdIUi1iBiArTSScpG-vuJ0dOvc)
 
-🧩 Instalação via Git
+### Comandos para o termux 
+```bash
+termux-setup-storage
+````
+
+```bash
+pkg update && pkg upgrade && pkg install -y git nodejs ffmpeg imagemagick yarn
+```
+
+###🧩 Instalação via Git
 1️⃣ Clone o repositório
 git clone https://github.com/szkkj/Subaru-Base
 
@@ -65,7 +74,7 @@ cd Subaru-Base/
 npm install
 
 4️⃣ Configure
-Edite o arquivo ./dono/configs/settings.json:
+Edite o arquivo `./dono/configs/settings.json:`
 {
   "prefix": "!",
   "botName": "Subaru-Base",
@@ -77,7 +86,8 @@ Edite o arquivo ./dono/configs/settings.json:
   "baseRaikken": "https://raikken-api.speedhosting.cloud"
 }
 
-> ⚠️ Nota: A chave "raikken" ainda está ativa e gratuita, mas pode expirar a qualquer momento.
+> [!WARNING] 
+> ⚠️ A chave "raikken" ainda está ativa e gratuita, mas pode expirar a qualquer momento.
 Para obter uma nova, entre em contato: WhatsApp
 
 5️⃣ Inicie o bot
