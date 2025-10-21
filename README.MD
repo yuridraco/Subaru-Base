@@ -49,7 +49,7 @@
 - *IA estilo SimSimi* (via [Raikken API](https://raikken-api.speedhosting.cloud))
 - *Menu interativo com botões*
 
-## 🚀 Instalação
+### 🚀 Instalação
 
 ### Baixe o bot
 📦 [Download direto V1 (MEGA)](https://mega.nz/file/3DxTWBqA#sAYDC5Xvy-oYMuXYAAdIUi1iBiArTSScpG-vuJ0dOvc)
@@ -63,7 +63,7 @@ termux-setup-storage
 pkg update && pkg upgrade && pkg install -y git nodejs ffmpeg imagemagick yarn
 ```
 
-###🧩 Instalação via Git
+### 🧩 Instalação via Git
 1️⃣ Clone o repositório
 git clone https://github.com/szkkj/Subaru-Base
 
@@ -75,6 +75,10 @@ npm install
 
 4️⃣ Configure
 Edite o arquivo `./dono/configs/settings.json:`
+
+`É de grande importância mudar o donoLid e o donoNmr!`
+
+```json
 {
   "prefix": "!",
   "botName": "Subaru-Base",
@@ -85,17 +89,17 @@ Edite o arquivo `./dono/configs/settings.json:`
   "RaikkenKey": "SUA_API_KEY",
   "baseRaikken": "https://raikken-api.speedhosting.cloud"
 }
-
+```
 > [!WARNING] 
 > ⚠️ A chave "raikken" ainda está ativa e gratuita, mas pode expirar a qualquer momento.
 Para obter uma nova, entre em contato: WhatsApp
 
 5️⃣ Inicie o bot
-sh start.sh
+`sh start.sh`
 
 💡 Dica:
 Se quiser atualizar o bot no futuro, entre na pasta e use:
-git pull
+`git pull` ou use o comando: `!checarversao`
 
 ### ▶️ Uso
 Inicie o bot com uma das opções:
@@ -105,6 +109,8 @@ node conection.js --code # Pairing Code (manual)
 sh start.sh              # Ambos (recomendado)
 
 Depois, use os comandos no WhatsApp conforme o prefixo definido.
+> [!WARNING] 
+> ⚠️Por padrão, o bot está com o banchat (ignorar comandos) ativos, use o comando: !banchat 0 para ativar no grupo!
 Exemplos:
 !menu              → Mostra o menu
 !sticker           → Cria figurinha
@@ -116,17 +122,17 @@ Exemplos:
 
 ⚡ Deploy
 O bot pode ser hospedado em:
-Ambiente	Suporte
-🧩 Termux	✅
-🖥️ Pterodactyl	✅
-🐧 VPS/Linux	✅
-☁️ Heroku	⚠️ (requer ajustes)
+Ambiente	Suporte  
+🧩 Termux	✅  
+🖥️ Pterodactyl	✅  
+🐧 VPS/Linux	✅  
+☁️ Heroku	⚠️ (requer ajustes)  
 
 
 👤 Créditos
 Base: Baileys
 Criação: Sz
-Integração IA: Raikken API
+Integração IA: Raikken-API
 
 📜 Licença
 Distribuído sob a Licença MIT.
@@ -137,7 +143,7 @@ Pra ser bem sincero, nem tava nos meus planos escrever esse texto aqui, mas acho
 Então bora lá 👇
 
 Agradecimentos especiais a: Spiral, Reis, Creeper, Thzy, Riki e Duarte, que testaram, deram feedback e ajudaram o bot a ficar como tá hoje.
-E claro, Anguish, cuja base inspirou o multi menu usado aqui 💪
+E claro, Anguish, cuja base inspirou o multi menu usado aqui. 💪
 
 A todos que esperaram esse projeto — obrigado de verdade!
 E se você tá lendo até o fim... pô, muito obrigado mesmo 😂

@@ -1290,5 +1290,17 @@
   {
     "Comando": "level",
     "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "revelar",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "infoscanal",
+    "Função": "Descrição pendente."
+  },
+  {
+    "Comando": "infocanal",
+    "Função": "Descrição pendente."
   }
 ]

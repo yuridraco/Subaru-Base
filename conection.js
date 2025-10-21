@@ -5,7 +5,7 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType, makeCacheableSignalKeyStore, cacheService } = require("baron-baileys-v2");
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType, makeCacheableSignalKeyStore, cacheService, Browsers } = require("baron-baileys-v2");
 const fs = require('fs')
 const pino = require("pino");
 const chalk = require('chalk')
@@ -60,7 +60,6 @@ const startConnection = async () => {
     version: [2, 3000, 1025190524],
     logger: pino({ level: "silent" }),
     printQRInTerminal: !process.argv.includes("--code"),
-    browser: ['Linux', 'Opera', '110.0.5481.100'],
     auth: state,
     markOnlineOnConnect: false,
     syncFullHistory: false,
@@ -131,10 +130,8 @@ const startConnection = async () => {
     const groupMetadata = isGroup ? await getGroupMetadataSafe(from, subaru) : {};
     const groupName = isGroup ? groupMetadata.subject : "Conversa Privada";
     const groupMembers = isGroup ? groupMetadata.participants : []
-    const senderObject = groupMembers.find(member => member.jid === sender);
-    let senderLid = null
-    if (senderObject) {
-    senderLid = senderObject.lid; }
+    const senderObject = groupMembers.find(member => member.jid === sender || member.id === sender || member.lid === sender);
+    let senderLid = senderObject ? senderObject.lid || senderObject.id : null;
     const cmd = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : null;
     const hora = new Date().toLocaleTimeString("pt-BR");
     let comando = cmd         
@@ -166,7 +163,7 @@ const startConnection = async () => {
      messageQueue.push(msg);
      processQueue();
     
-      
+      cacheService.saveGroupMetadata(from, groupMetadata);
      if (cmd) {
         console.log(
         chalk.blueBright("\n╔══════╌✯╌═⊱×⊰ 𝐒𝐮𝐛𝐚𝐫𝐮-𝐁𝐚𝐬𝐞 ⊰×⊰═╌✯╌══════╗") + "\n" +

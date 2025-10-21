@@ -423,7 +423,7 @@ var _sticker = new Sticker()
 _sticker.addFile(getfile); 
 _sticker.options.metadata = {pack: pack, author: data, emojis: ['🤠', '🥶', '😻']};
  resultadoSt = await _sticker.start();
-await subaru.sendMessage(from, {sticker: fs.readFileSync(resultadoSt[0].value), contextInfo: {externalAdReply: {title: "FIGURINHA KIBADAKKKKKJ", body:"", previewType:"PHOTO", thumbnail: fs.readFileSync(resultadoSt[0].value)}}}, {quoted: selo})
+await subaru.sendMessage(from, {sticker: fs.readFileSync(resultadoSt[0].value), contextInfo: {externalAdReply: {title: "FIGURINHA KIBADAKKKKKJ", body:"", previewType:"PHOTO", thumbnail: fs.readFileSync(resultadoSt[0].value)}}}, {quoted: seloSz})
 await fs.unlinkSync(resultadoSt[0].value)
 } catch(e) {console.log(e)}
 }
@@ -457,7 +457,7 @@ var _sticker = new Sticker()
 _sticker.addFile(getfile); 
 _sticker.options.metadata = {pack: pack, author: autor, emojis: ['🤠', '🥶', '😻']};
 resultadoSt = await _sticker.start();
-await subaru.sendMessage(from, {sticker: fs.readFileSync(resultadoSt[0].value), contextInfo: {externalAdReply: {title: txt, body:"", previewType:"PHOTO", thumbnail: fs.readFileSync(resultadoSt[0].value)}}}, {quoted: selo})
+await subaru.sendMessage(from, {sticker: fs.readFileSync(resultadoSt[0].value), contextInfo: {externalAdReply: {title: txt, body:"", previewType:"PHOTO", thumbnail: fs.readFileSync(resultadoSt[0].value)}}}, {quoted: seloSz})
 await fs.unlinkSync(resultadoSt[0].value)
 } catch(e) {console.log(e)}
 }
@@ -529,7 +529,7 @@ antidoc: false,
 antictt: false,
 antiloc: false, 
 banchat: true,
-simih: true,
+simih: false,
 modobn: false,
 aluguel: false,
 cooldown: true,
@@ -1065,7 +1065,7 @@ ppimg,
 info
 );
 }
-            
+
 if (body.toLowerCase().includes(`💀`)) {
 if(!isQuotedSticker) return;
 reply2('⏳ Aguarde, processando figurinha...');
@@ -1434,6 +1434,7 @@ try {
 switch (command) {
 
 //=====( ABAIXO OS COMANDOS DE MEMBRO \ MEMBROS )=====\\
+
 
 case 'take': {
 if (!isQuotedSticker) {return reply('Você usou de forma errada... Marque uma figurinha.')};
@@ -1939,7 +1940,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(args.length < 1) return reply(`Você precisa digitar da forma correta... Por exemplo: *${prefix}chance* _do jubileu ser gay_`)
-await subaru.sendMessage(from, {text: `😵‍💫🌟 - A chance _“${q}”_ é de: *${Math.floor(Math.random() * 100)}%*. Eai, foi o que a probabilidade que esperava jovem?`, mentions: [sender]}, {quoted: selo});
+await subaru.sendMessage(from, {text: `😵‍💫🌟 - A chance _“${q}”_ é de: *${Math.floor(Math.random() * 100)}%*. Eai, foi o que a probabilidade que esperava jovem?`, mentions: [sender]}, {quoted: seloSz});
 break
 
 case 'comer':
@@ -1948,7 +1949,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer botar rebolar pros cria, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/d46ff5e2b8f4c5335e362.mp4`}, gifPlayback: true, caption: `Você acabou de comer a(o) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/d46ff5e2b8f4c5335e362.mp4`}, gifPlayback: true, caption: `Você acabou de comer a(o) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'capinarlote':
@@ -1957,7 +1958,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer botar pra capinar um lote, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/4682c1b474ce5dee3a48d.mp4`}, gifPlayback: true, caption: `Você acabou de botar o(a) *@${alvo.split('@')[0]}* pra capinar um lote`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/4682c1b474ce5dee3a48d.mp4`}, gifPlayback: true, caption: `Você acabou de botar o(a) *@${alvo.split('@')[0]}* pra capinar um lote`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'pgpeito':
@@ -1966,7 +1967,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer pegar nos peitinhos, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/52d46e2c58318b8cfcacc.mp4`}, gifPlayback: true, caption: `Você acabou de pegar nos peitos do(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/52d46e2c58318b8cfcacc.mp4`}, gifPlayback: true, caption: `Você acabou de pegar nos peitos do(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 
@@ -1976,7 +1977,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer pegar no pau dele(a), a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/5073ba8be6b099ed812a7.mp4`}, gifPlayback: true, caption: `Você acabou de pegar no pau do(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/5073ba8be6b099ed812a7.mp4`}, gifPlayback: true, caption: `Você acabou de pegar no pau do(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 
@@ -1986,7 +1987,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que desejas ser acariciado, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/e62de1e6863c59d284b2e.mp4`}, gifPlayback: true, caption: `Você acabou de pegar na bunda do(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/e62de1e6863c59d284b2e.mp4`}, gifPlayback: true, caption: `Você acabou de pegar na bunda do(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'morder':
@@ -1995,7 +1996,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer dar uma mordida, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/75e4c0273be625a2363ce.mp4`}, gifPlayback: true, caption: `Você acabou de dar uma mordida no(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/75e4c0273be625a2363ce.mp4`}, gifPlayback: true, caption: `Você acabou de dar uma mordida no(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'sentar':
@@ -2004,7 +2005,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer dar uma sentadinha, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/d695e05443043ff9a254d.mp4`}, gifPlayback: true, caption: `Você acabou de dar uma sentadinha no(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/d695e05443043ff9a254d.mp4`}, gifPlayback: true, caption: `Você acabou de dar uma sentadinha no(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'tirarft':
@@ -2013,7 +2014,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer tirar a foto, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/7193308e3949803132bad.mp4`}, gifPlayback: true, caption: `Você acabou de tirar uma foto do(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/7193308e3949803132bad.mp4`}, gifPlayback: true, caption: `Você acabou de tirar uma foto do(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'estuprar':
@@ -2022,7 +2023,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque a pessoa que você quer comer a força, a mensagem ou o @');
-await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/kusu1d.mp4`}, gifPlayback: true, caption: `Ta prr 🔥 *@${alvo.split('@')[0]}* Você foi estuprado 😰` , mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/kusu1d.mp4`}, gifPlayback: true, caption: `Ta prr 🔥 *@${alvo.split('@')[0]}* Você foi estuprado 😰` , mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'boquete':
@@ -2031,7 +2032,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque a pessoa que você quer botar pra mamar, a mensagem ou o @');
-await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/4hvf79.mp4`}, gifPlayback: true, caption: `Eita *@${alvo.split('@')[0]}* garganta profunda voce tem 😰` , mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/4hvf79.mp4`}, gifPlayback: true, caption: `Eita *@${alvo.split('@')[0]}* garganta profunda voce tem 😰` , mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'cagar':
@@ -2040,7 +2041,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque a pessoa que você quer botar pra cagar, a mensagem ou o @');
-await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/662vzj.mp4`}, gifPlayback: true, caption: `CARALHOOOOO *@${alvo.split('@')[0]}* FAMOSO CAGA TRONCO KAKAKAKAK??? 🤯😳` , mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url: `https://files.catbox.moe/662vzj.mp4`}, gifPlayback: true, caption: `CARALHOOOOO *@${alvo.split('@')[0]}* FAMOSO CAGA TRONCO KAKAKAKAK??? 🤯😳` , mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'cu':
@@ -2048,11 +2049,11 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando quantos cm de profundidade tem seu bozo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando quantos cm de profundidade tem seu bozo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
 await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/x8k6en.jpg`}, caption: `Quantos cm o(a) *@${sender_ou_n.split("@")[0]}* 
-tem no bozo ?\n• A chance é de *${random}cm* 😳`, mentions: [sender_ou_n]}, {quoted: selo})
+tem no bozo ?\n• A chance é de *${random}cm* 😳`, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2063,7 +2064,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer dar um abraço, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://files.catbox.moe/ecw188.mp4`}, gifPlayback: true, caption: `Você acabou de dar um abraço fofo no(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://files.catbox.moe/ecw188.mp4`}, gifPlayback: true, caption: `Você acabou de dar um abraço fofo no(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'lavarlouca':
@@ -2072,7 +2073,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer botar pra lavar a louça, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://files.catbox.moe/qptf5k.mp4`}, gifPlayback: true, caption: `Você acabou de botar a(o) *@${alvo.split('@')[0]}* pra lavar a louça`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://files.catbox.moe/qptf5k.mp4`}, gifPlayback: true, caption: `Você acabou de botar a(o) *@${alvo.split('@')[0]}* pra lavar a louça`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'carinho':
@@ -2081,7 +2082,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque o alvo que você quer dar um carinho, a mensagem ou o @.')
-await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/2b6b4f4e38214bd6164ce.mp4`}, gifPlayback: true, caption: `Você acabou de dar um carinho no(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url:`https://telegra.ph/file/2b6b4f4e38214bd6164ce.mp4`}, gifPlayback: true, caption: `Você acabou de dar um carinho no(a) *@${alvo.split('@')[0]}*`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'morte': case 'death':
@@ -2092,7 +2093,7 @@ if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 if (args.length == 0) return reply(`Está faltando o nome da pessoa! Por exemplo: ${prefix+command} Victor`)
 predea = await axios.get(`https://api.agify.io/?name=${encodeURIComponent(args[0])}`);
 if (predea.data.age == null) return reply(`Você inseriu um nome invalido, certifique-se de inserir um sem acentos, emojis, números e outros.`);
-await subaru.sendMessage(from, {video: {url: deathcmd}, gifPlayback: true, caption: `Pessoas com este nome citado “${predea.data.name}” tendem a morrer aos ${predea.data.age} anos.`, mentions: [sender]}, {quoted: selo});
+await subaru.sendMessage(from, {video: {url: deathcmd}, gifPlayback: true, caption: `Pessoas com este nome citado “${predea.data.name}” tendem a morrer aos ${predea.data.age} anos.`, mentions: [sender]}, {quoted: seloSz});
 break
 
 
@@ -2128,10 +2129,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de nazista: *@${sender_ou_n.split("@")[0]}* aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de nazista: *@${sender_ou_n.split("@")[0]}* aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: imgnazista}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa nazista?\n• Porcentagem de chance de ser uma pessoa nazista: *${random}%.* `, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: imgnazista}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa nazista?\n• Porcentagem de chance de ser uma pessoa nazista: *${random}%.* `, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2140,13 +2141,13 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de gay: @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de gay: @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
 feio = random; boiola = random
 if(boiola < 20 ) {var bo = 'hmm... você é hetero...'} else if(boiola == 21 ) {var bo = '+/- boiola'} else if(boiola == 23 ) {var bo = '+/- boiola'} else if(boiola == 24 ) {var bo = '+/- boiola'} else if(boiola == 25 ) {var bo = '+/- boiola'} else if(boiola == 26 ) {var bo = '+/- boiola'} else if(boiola == 27 ) {var bo = '+/- boiola'} else if(boiola == 2 ) {var bo = '+/- boiola'} else if(boiola == 29 ) {var bo = '+/- boiola'} else if(boiola == 30 ) {var bo = '+/- boiola'} else if(boiola == 31 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 32 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 33 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 34 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 35 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 36 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 37 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 3 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 39 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 40 ) {var bo = 'tenho minha desconfiança...'} else if(boiola == 41 ) {var bo = 'você é né?'} else if(boiola == 42 ) {var bo = 'você é né?'} else if(boiola == 43 ) {var bo = 'você é né?'} else if(boiola == 44 ) {var bo = 'você é né?'} else if(boiola == 45 ) {var bo = 'você é né?'} else if(boiola == 46 ) {var bo = 'você é né?'} else if(boiola == 47 ) {var bo = 'você é né?'} else if(boiola == 4 ) {var bo = 'você é né?'} else if(boiola == 49 ) {var bo = 'você é né?'} else if(boiola == 50 ) {var bo = 'você é ou não?'} else if(boiola > 51) {var bo = 'você é gay...'
 }
-await subaru.sendMessage(from, {image: {url: imggay}, caption: `Qual é a porcentagem de chance do(a) *@${sender_ou_n.split("@")[0]}* ser gay?\n• *${random}% homossexual*, ${bo}`, mentions: [sender_ou_n], thumbnail:null}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: imggay}, caption: `Qual é a porcentagem de chance do(a) *@${sender_ou_n.split("@")[0]}* ser gay?\n• *${random}% homossexual*, ${bo}`, mentions: [sender_ou_n], thumbnail:null}, {quoted: seloSz})
 }, 7000)
 break
 
@@ -2155,12 +2156,12 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de feio: *@${sender_ou_n.split("@")[0]}* aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text: `Pesquisando a sua ficha de feio: *@${sender_ou_n.split("@")[0]}* aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
  setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
 feio = random
 if(feio < 20 ) {var bo = 'É não é feio'} else if(feio == 21 ) {var bo = '+/- feio'} else if(feio == 23 ) {var bo = '+/- feio'} else if(feio == 24 ) {var bo = '+/- feio'} else if(feio == 25 ) {var bo = '+/- feio'} else if(feio == 26 ) {var bo = '+/- feio'} else if(feio == 27 ) {var bo = '+/- feio'} else if(feio == 2 ) {var bo = '+/- feio'} else if(feio == 29 ) {var bo = '+/- feio'} else if(feio == 30 ) {var bo = '+/- feio'} else if(feio == 31 ) {var bo = 'ainda tá na média'} else if(feio == 32 ) {var bo = 'dá pra pegar umas(ns) novinha(o) ainda'} else if(feio == 33 ) {var bo = 'Da pra pegar umas(ns) novinha(o) ainda'} else if(feio == 34 ) {var bo = 'é fein, mas tem baum coração'} else if(feio == 35 ) {var bo = 'tá na média, mas não deixa de ser feii'} else if(feio == 36 ) {var bo = 'bonitin mas é feio com orgulho'} else if(feio == 37 ) {var bo = 'feio e preguiçoso(a), vai se arrumar praga feia'} else if(feio == 3 ) {var bo = 'tenho '} else if(feio == 39 ) {var bo = 'feio, mas um banho e se arrumar, deve resolver'} else if(feio == 40 ) {var bo = 'fein,mas não existe gente feia, existe gente que não conhece os produtos jequity'} else if(feio == 41 ) {var bo = 'você é Feio, mas é legal, continue assim'} else if(feio == 42 ) {var bo = 'Nada que uma maquiagem e se arrumar, que não resolva.'} else if(feio == 43 ) {var bo = 'Feio que dói de ver, compra uma máscara que melhora'} else if(feio == 44 ) {var bo = 'Feio mas nada que um saco na cabeça não resolva né!?'} else if(feio == 45 ) {var bo = 'você é feio, mas tem bom gosto'} else if(feio == 46 ) {var bo = 'feio mas tem muitos amigos'} else if(feio == 47 ) {var bo = 'é feio mas tem lábia pra pegar várias novinha'} else if(feio == 4 ) {var bo = 'feio e ainda não sabe se vestir, vixi'} else if(feio == 49 ) {var bo = 'feiooo dms vey.'} else if(feio == 50 ) {var bo = 'você é feio, mas não se encherga.'} else if(feio > 51) {var bo = 'você é feio demais bixo.'}
-await subaru.sendMessage(from, {image: {url: imgfeio}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa feia?\n• A porcentagem de chance é *${random}%*, ${bo}`, mentions: [sender_ou_n], thumbnail:null}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: imgfeio}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa feia?\n• A porcentagem de chance é *${random}%*, ${bo}`, mentions: [sender_ou_n], thumbnail:null}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2169,10 +2170,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a ficha de corno @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a ficha de corno @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: imgcorno}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa chifruda?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: imgcorno}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa chifruda?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break
 
@@ -2181,10 +2182,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a ficha de vesgo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a ficha de vesgo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
  setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: imgvesgo}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa vesga?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: imgvesgo}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa vesga?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2193,10 +2194,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a ficha de bebado(a) @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a ficha de bebado(a) @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: imgbebado}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa bêbada?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: imgbebado}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa bêbada?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2205,10 +2206,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a ficha de gado @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a ficha de gado @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: imggado}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser um gado?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: imggado}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser um gado?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2217,10 +2218,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a ficha de fiel @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a ficha de fiel @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/hwbqmt.webp`}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser fiel?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/hwbqmt.webp`}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser fiel?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2229,10 +2230,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a ficha de lindo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a ficha de lindo @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/2r420g.jpg`}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser lindo?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/2r420g.jpg`}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser lindo?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2241,10 +2242,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a ficha de linda @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a ficha de linda @${sender_ou_n.split("@")[0]}, aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/yb6hpe.jpg`}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser linda?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/yb6hpe.jpg`}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser linda?\n• A porcentagem de chance é *${random}%*`, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2253,10 +2254,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a sua ficha de gostoso @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a sua ficha de gostoso @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
  setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/xkw2bd.jpg`}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa gostosa?\n• A porcentagem de chance é *${random}%*`, gifPlayback: true, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/xkw2bd.jpg`}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa gostosa?\n• A porcentagem de chance é *${random}%*`, gifPlayback: true, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2265,10 +2266,10 @@ if(!isGroup) return reply("Somente em grupos.")
 if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
-await subaru.sendMessage(from, {text:`Pesquisando a sua ficha de gostosa @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {text:`Pesquisando a sua ficha de gostosa @${sender_ou_n.split("@")[0]} aguarde...`, mentions: [sender_ou_n]}, {quoted: seloSz})
 setTimeout(async() => {
 random = `${Math.floor(Math.random() * 110)}`
-await subaru.sendMessage(from, {image: {url: imggostosa}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa gostosa?\n• A porcentagem de chance é *${random}%*`, gifPlayback: true, mentions: [sender_ou_n]}, {quoted: selo})
+await subaru.sendMessage(from, {image: {url: imggostosa}, caption: `O quanto *@${sender_ou_n.split("@")[0]}* pode ser uma pessoa gostosa?\n• A porcentagem de chance é *${random}%*`, gifPlayback: true, mentions: [sender_ou_n]}, {quoted: seloSz})
 }, 7000)
 break 
 
@@ -2279,7 +2280,7 @@ if(!isModobn) return reply("Modo brincadeiras precisa estar ativo.");
 if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 ;
 if(!alvo) return reply('Marque o alvo que você quer da um chute, a mensagem ou o @')
-await subaru.sendMessage(from, {video: {url: chutecmd}, gifPlayback: true, caption: `Você acabou de dar um chute em *@${alvo.split('@')[0]}*.`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {video: {url: chutecmd}, gifPlayback: true, caption: `Você acabou de dar um chute em *@${alvo.split('@')[0]}*.`, mentions: [alvo]}, {quoted: seloSz})
 break 
 
 case 'dogolpe':
@@ -2289,7 +2290,7 @@ if(!somembros.length) return reply("Não encontrei membros nesse grupo.")
 
 if(!alvo) return reply('Marque a mensagem com o comando ou marque o @ do usuário..')
 randomF = ["𝐄𝐌 𝐈𝐋𝐔𝐃𝐈𝐑 𝐏𝐄𝐒𝐒𝐎𝐀𝐒", "𝐄𝐌 𝐅𝐄𝐑𝐈𝐑 𝐎𝐒 𝐒𝐄𝐍𝐓𝐈𝐌𝐄𝐍𝐓𝐎𝐒", "𝐄𝐌 𝐃𝐀𝐑 𝐂𝐇𝐈𝐅𝐑𝐄"]
-await subaru.sendMessage(from, {text: `𝐎(𝐀) *@${alvo.split("@")[0]}* 𝐄 𝐄𝐒𝐏𝐄𝐂𝐈𝐀𝐋𝐈𝐒𝐓𝐀: ${randomF[Math.floor(Math.random() * randomF.length)]}.`, mentions: [alvo]}, {quoted: selo})
+await subaru.sendMessage(from, {text: `𝐎(𝐀) *@${alvo.split("@")[0]}* 𝐄 𝐄𝐒𝐏𝐄𝐂𝐈𝐀𝐋𝐈𝐒𝐓𝐀: ${randomF[Math.floor(Math.random() * randomF.length)]}.`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'shipo':
@@ -2314,7 +2315,7 @@ try {ppimg2 = await subaru.profilePictureUrl(m2)} catch(erro) {ppimg2 = 'https:/
 p1 = await axios.get(`https://tinyurl.com/api-create.php?url=${ppimg}`)
 p2 = await axios.get(`https://tinyurl.com/api-create.php?url=${ppimg2}`)
 random = Math.floor(Math.random() * 100)
-await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/gosmx9.jpg`}, caption: `『👩🏼‍❤️‍💋‍👨🏻』- 𝐒𝐈𝐍𝐓𝐎 𝐐𝐔𝐄 𝐄𝐒𝐒𝐄𝐒 𝐃𝐎𝐈𝐒 𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐀 𝐔𝐌 𝐎𝐓𝐈𝐌𝐎 𝐂𝐀𝐒𝐀𝐋:\n\n『@${m1.split("@")[0]}』\n\n『@${m2.split("@")[0]}』\n\n𝐂𝐎𝐌 𝐔𝐌𝐀 𝐄𝐒𝐏𝐄𝐂𝐓𝐀𝐓𝐈𝐕𝐀 𝐃𝐄:*『${random+"%"}』*`, mentions: [m1, m2]}, {quoted: selo}).catch((error) => {reply(mess.error())})
+await subaru.sendMessage(from, {image: {url: `https://files.catbox.moe/gosmx9.jpg`}, caption: `『👩🏼‍❤️‍💋‍👨🏻』- 𝐒𝐈𝐍𝐓𝐎 𝐐𝐔𝐄 𝐄𝐒𝐒𝐄𝐒 𝐃𝐎𝐈𝐒 𝐅𝐎𝐑𝐌𝐀𝐑𝐈𝐀 𝐔𝐌 𝐎𝐓𝐈𝐌𝐎 𝐂𝐀𝐒𝐀𝐋:\n\n『@${m1.split("@")[0]}』\n\n『@${m2.split("@")[0]}』\n\n𝐂𝐎𝐌 𝐔𝐌𝐀 𝐄𝐒𝐏𝐄𝐂𝐓𝐀𝐓𝐈𝐕𝐀 𝐃𝐄:*『${random+"%"}』*`, mentions: [m1, m2]}, {quoted: seloSz}).catch((error) => {reply(mess.error())})
 break
 
 case 'gozar': case 'goza'://by tzn pau de me
@@ -2328,7 +2329,7 @@ const gozacao = gozars[Math.floor(Math.random() * gozars.length)];
 if(!isGroup) return reply('*sᴏᴍᴇɴᴛᴇ ᴇᴍ ɢʀᴜᴘᴏs 🙇‍♂️*')//tzn modalidades esportivas
 if(!alvo) return reply('*ᴍᴀʀǫᴜᴇ ᴀ ᴘᴇssᴏᴀ ǫᴜᴇ ᴠᴏᴄᴇ ǫᴜᴇʀ ɢᴏᴢᴀʀ 🙈*')
 subaru.sendMessage(from, {video: {url: `https://telegra.ph/file/8a82de1e9da332773f52c.mp4`}, gifPlayback: true, caption: `${gozacao} @${alvo.split('@')[0]} 🥵
-`, mentions: [alvo]}, {quoted: selo})
+`, mentions: [alvo]}, {quoted: seloSz})
 break
 
 case 'wame':
