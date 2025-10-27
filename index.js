@@ -646,115 +646,128 @@ return query.replace(/#p#/g, prefix).replace(/#pc#/g, prefix + comando);
 };
 
 //======(JOGO-DA-VELHA)=======(Função)===\\
+//=========(FUNÇÃO-JOGO-DA-VELHA)=========\\
+//By: Spiral
+//Agora menciona a pessoa ao invés de mostrar o lid
 const { validmove, setGame } = require("./database/tictactoe");
-const SNET = "@s.whatsapp.net";
 const argss = body.split(/ +/g);
-const JOGO_D_V = fs?.existsSync(`./database/tictactoe/db/${from}.json`) ?
-JSON?.parse(fs?.readFileSync(`./database/tictactoe/db/${from}.json`)) : false
+function normalizeJid(jid = "") {
+if (!jid) return "";
+return jid.replace(/@.+/, '').trim();
+}
+
+let JOGO_D_V = fs.existsSync(`./database/tictactoe/db/${from}.json`) ? JSON.parse(fs.readFileSync(`./database/tictactoe/db/${from}.json`)) : false;
 async function joguinhodavelha() {
-const cmde = budy.toLowerCase().split(" ")[0] || "";
-let arrNum = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
-if(JOGO_D_V != false) {
-const boardnow = setGame(`${from}`);
-if(budy == "Cex") return reply("why");
-if(
-budy.toLowerCase() == "S" ||
-budy.toLowerCase() == "sim" ||
-budy.toLowerCase() == "ok"
-) {
-if(boardnow.O == sender.replace(SNET, "")) {
-if(boardnow.status)
-return reply(`O jogo já começou antes!`);
-const matrix = boardnow._matrix;
+console.log("🚀 joguinhodavelha() chamada — from:", from, "sender:", sender, "mensagem:", budy);
+const cmde = (budy || "").trim().toLowerCase();
+const arrNum = ["1","2","3","4","5","6","7","8","9"];
+let boardnow;
+if (JOGO_D_V != false) {
+boardnow = setGame(`${from}`);
+const normalizedSender = normalizeJid(sender);
+if (["s", "sim", "ok"].includes(cmde)) {
+console.log("✅ Recebeu aceitação ('s')");
+if (normalizeJid(boardnow.O) === normalizedSender) {
+if (boardnow.status) return reply("O jogo já começou antes!");
 boardnow.status = true;
-fs.writeFileSync(`./database/tictactoe/db/${from}.json`,
-JSON.stringify(boardnow, null, 2)
-);
-const chatAccept = `*🎮Ꮐ̸Ꭺ̸Ꮇ̸Ꭼ̸ Ꭰ̸Ꭺ̸ Ꮩ̸Ꭼ̸Ꮮ̸Ꮋ̸Ꭺ̸🕹️*
+fs.writeFileSync(`./database/tictactoe/db/${from}.json`, JSON.stringify(boardnow, null, 2));
 
-❌ : @${boardnow.X}
-⭕ : @${boardnow.O}
+const matrix = boardnow._matrix;
+const chatAccept = `*🎮 JOGO DA VELHA 🕹️*
+❌ : @${normalizeJid(boardnow.X)}
+⭕ : @${normalizeJid(boardnow.O)}
 
-Sua vez... : @${boardnow.turn == "X" ? boardnow.X : boardnow.O}
+Sua vez... : @${boardnow.turn == "X" ? normalizeJid(boardnow.X) : normalizeJid(boardnow.O)}
 
 ${matrix[0][0]}${matrix[0][1]}${matrix[0][2]}
 ${matrix[1][0]}${matrix[1][1]}${matrix[1][2]}
 ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
 `;
-mention(chatAccept, groupMemb2);
+await subaru.sendMessage(from, { 
+text: chatAccept,
+mentions: [boardnow.X, boardnow.O, (boardnow.turn == "X" ? boardnow.X : boardnow.O)]
+});
 }
-} else if(
-budy.toLowerCase() == "N" ||
-budy.toLowerCase() == "não" ||
-budy.toLowerCase() == "no"
-) {
-if(boardnow.O == sender.replace(SNET, "")) {
-if(boardnow.status)
-return reply(`O jogo já começou!`);
+return;
+} else if (["n", "não", "nao", "no"].includes(cmde)) {
+console.log("❌ Recebeu recusa ('n')");
+if (normalizeJid(boardnow.O) === normalizedSender) {
+if (boardnow.status) return reply("O jogo já começou!");
 DLT_FL(`./database/tictactoe/db/${from}.json`);
-mention(`@${boardnow.X} *_Infelizmente seu oponente não aceitou o desafio ❌😕_*`, groupMemb2)
+await subaru.sendMessage(from, {
+text: `@${normalizeJid(boardnow.X)} *_Infelizmente seu oponente não aceitou o desafio ❌😕_*`,
+mentions: [boardnow.X]
+});
 }
+return;
 }
 }
 
-if(arrNum.includes(cmde)) {
-const boardnow = setGame(`${from}`);
-if(!boardnow.status) return reply(`Parece que seu oponente não aceitou o desafio ainda...`)
-if(
-(boardnow.turn == "X" ? boardnow.X : boardnow.O) !=
- 
-sender.replace(SNET, "")
-)
+if (arrNum.includes(cmde)) {
+boardnow = setGame(`${from}`);
+const normalizedSender = normalizeJid(sender);
+if (!boardnow.status) return reply("Parece que seu oponente não aceitou o desafio ainda...");
+
+const currentPlayer = boardnow.turn == "X" ? boardnow.X : boardnow.O;
+if (normalizeJid(currentPlayer) != normalizedSender) {
+console.log("Não é o turno desse usuário, ignorando movimento.");
 return;
-const moving = validmove(Number(budy), `${from}`);
+}
+
+const moving = validmove(Number(cmde), `${from}`);
 const matrix = moving._matrix;
-if(moving.isWin) {
-if(moving.winner == "SERI") {
-const chatEqual = `*🎮Ꮐ̸Ꭺ̸Ꮇ̸Ꭼ̸ Ꭰ̸Ꭺ̸ Ꮩ̸Ꭼ̸Ꮮ̸Ꮋ̸Ꭺ̸🕹️*
 
-Jogo termina empatado 😐
-`;
-reply(chatEqual);
+if (moving.isWin) {
+if (moving.winner == "SERI") {
+reply("*🎮 Jogo termina empatado 😐*");
 DLT_FL(`./database/tictactoe/db/${from}.json`);
 return;
 }
-const abt = Math.ceil(Math.random() + 4000)
+
 const winnerJID = moving.winner == "O" ? moving.O : moving.X;
-const looseJID = moving.winner == "O" ? moving.X : moving.O;
-const limWin = Math.floor(Math.random() * 1) + 10;
-const limLoose = Math.floor(Math.random() * 1) + 5;
-const chatWon = `*🎮Ꮐ̸Ꭺ̸Ꮇ̸Ꭼ̸ Ꭰ̸Ꭺ̸ Ꮩ̸Ꭼ̸Ꮮ̸Ꮋ̸Ꭺ̸🕹️*
+const chatWon = `*🎮 Vencido por @${normalizeJid(winnerJID)} 😎👑*`;
 
-Vencido por @${winnerJID} 😎👑
-`;
+await subaru.sendMessage(from, {
+text: chatWon,
+mentions: [winnerJID, moving.X, moving.O]
+});
 
-mention(chatWon, groupMemb2)
-setTimeout( () => {
-if(fs.existsSync("./database/tictactoe/db/" + from + ".json")) {
-DLT_FL("./database/tictactoe/db/" + from + ".json");
-reply(`*🕹️JOGO DA VELHA RESETADO...🕹️*`);
-} else {
-console.log("JOGO DA VELHA EXPIRADO") 
+setTimeout(() => {
+if (fs.existsSync(`./database/tictactoe/db/${from}.json`)) {
+DLT_FL(`./database/tictactoe/db/${from}.json`);
+reply("*🕹️JOGO DA VELHA RESETADO...🕹️*");
 }
-}, 300000) //5 minutos
-reply(`_*🥳Parabéns @${winnerJID} Você ganhou! Jogue mais vezes e se divirta!🎉...*_`)
+}, 300000);
+
+await subaru.sendMessage(from, {
+text: `_*🥳Parabéns @${normalizeJid(winnerJID)}, você ganhou! 🎉*_`,
+mentions: [winnerJID]
+});
 
 DLT_FL(`./database/tictactoe/db/${from}.json`);
 } else {
-const chatMove = `*🎮Ꮐ̸Ꭺ̸Ꮇ̸Ꭼ̸ Ꭰ̸Ꭺ̸ Ꮩ̸Ꭼ̸Ꮮ̸Ꮋ̸Ꭺ̸🕹️*
+const chatMove = `*🎮 JOGO DA VELHA 🕹️*
+❌ : @${normalizeJid(moving.X)}
+⭕ : @${normalizeJid(moving.O)}
 
-❌ : @${moving.X}
-⭕ : @${moving.O}
-
-Sua vez : @${moving.turn == "X" ? moving.X : moving.O}
+Sua vez : @${normalizeJid(moving.turn == "X" ? moving.X : moving.O)}
 
 ${matrix[0][0]}${matrix[0][1]}${matrix[0][2]}
 ${matrix[1][0]}${matrix[1][1]}${matrix[1][2]}
 ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
 `;
-mention(chatMove, groupMemb2);
+await subaru.sendMessage(from, {
+text: chatMove,
+mentions: [moving.X, moving.O, (moving.turn == "X" ? moving.X : moving.O)]
+});
 }
-}}
+}
+}
+
+if (fs.existsSync(`./database/tictactoe/db/${from}.json`)) {
+await joguinhodavelha();
+}
+//===========================================\\
 
 if (isBanchat && !isDono) { return //console.log(`Comando efetuado, mas tô off.`) 
 }
@@ -1820,48 +1833,49 @@ break
 
 
 /* ====( AQUI AINDA SÃO CMDS DE MEMBROS, MAS APENAS BRINCADEIRAS )==== */
-case 'jogodavelha':
-if(!isGroup) return reply("Só grupos!")
-if(!menc_jid2) return reply("Marque junto com o comando, o @ do usuário que deseja desafiar..")
-if(JOGO_D_V != false) {
+case 'jogodavelha': {
+if (!isGroup) return reply("Só grupos!");
+if (!alvo) return reply("Marque junto com o comando, o @ do usuário que deseja desafiar.");
+const normalizeJid = (jid) => jid ? jid.replace(/(@s\.whatsapp\.net|@lid)/g, "") : jid;
+if (JOGO_D_V != false) {
 const boardnow = setGame(`${from}`);
 const matrix = boardnow._matrix;
 const chatMove = `*🎮Ꮐ̸Ꭺ̸Ꮇ̸Ꭼ̸ Ꭰ̸Ꭺ̸ Ꮩ̸Ꭼ̸Ꮮ̸Ꮋ̸Ꭺ̸🕹️*
- 
-[❗] Alguém está jogando no momento...\n\n@${boardnow.X} VS @${boardnow.O}
- 
-❌ : @${boardnow.X}
-⭕ : @${boardnow.O}
- 
- Sua vez : @${boardnow.turn == "X" ? boardnow.X : boardnow.O}
- 
+
+[❗] Alguém está jogando no momento...
+
+❌ : @${boardnow.X.split('@')[0]}
+⭕ : @${boardnow.O.split('@')[0]}
+
+Sua vez : @${boardnow.turn == "X" ? boardnow.X.split('@')[0] : boardnow.O.split('@')[0]}
+
 ${matrix[0][0]}${matrix[0][1]}${matrix[0][2]}
 ${matrix[1][0]}${matrix[1][1]}${matrix[1][2]}
 ${matrix[2][0]}${matrix[2][1]}${matrix[2][2]}
 
 caso queira resetar o jogo, mande um adm ou os jogadores que estão jogando utilizar o comando ${prefix}rv
 `;
-mention(chatMove, groupMemb2);
+await subaru.sendMessage(from, { text: chatMove, mentions: [boardnow.X, boardnow.O, (boardnow.turn == "X" ? boardnow.X : boardnow.O)]});
 return;
 }
-if(q.length === 1) return reply(`*⟅❗⟆ Jogue com Alguem!!!!*
-*para inicar a partida : ${prefix + command} @membro do gp*`);
+if (q.length === 1) return reply(`*⟅❗⟆ Jogue com Alguém!*\n*Para iniciar a partida:* ${prefix + command} @membro`);
 const boardnow = setGame(`${from}`);
 boardnow.status = false;
-boardnow.X = sender.replace(SNET, "");
-boardnow.O = argss[1].replace("@", "");
-var blabord = [`${boardnow.X}`, `${boardnow.O}`]
-fs.writeFileSync(`./database/tictactoe/db/${from}.json`,
-JSON.stringify(boardnow, null, 2)
-);
+boardnow.X = sender;
+const alvoJid = alvo.includes('@') ? alvo : alvo + '@lid';
+boardnow.O = alvoJid;
+
+const blabord = [boardnow.X, boardnow.O];
+fs.writeFileSync(`./database/tictactoe/db/${from}.json`, JSON.stringify(boardnow, null, 2));
 const strChat = `*『📌ᎬՏᏢᎬᎡᎪΝᎠϴ ϴ ϴᏢϴΝᎬΝͲᎬ⚔️』*
- 
-@${sender.replace(SNET,
-"")} _está te desafiando para uma partida de jogo da velha..._
-_[ ${argss[1]} ] Use *『S』* para aceitar ou *『N』* para não aceitar..._\n\nEm caso de problemas, marque algum administrador para resetar o jogo com o comando ${prefix}rv`;
-b = [sender, menc_jid]
-mentions(strChat, b, true)
-break
+
+@${boardnow.X.split('@')[0]} está te desafiando para uma partida de jogo da velha!
+_[ @${boardnow.O.split('@')[0]} ] Use *『S』* para aceitar ou *『N』* para recusar..._
+
+Em caso de problemas, marque um administrador para resetar o jogo com o comando ${prefix}rv`;
+await subaru.sendMessage(from, { text: strChat, mentions: [boardnow.X, boardnow.O]});
+break;
+}
 
 case 'resetarvelha':
 case 'rv': 
@@ -4042,6 +4056,26 @@ enviar(`Ative o bemvindo primeiro`
 }
 break
 
+case 'cooldown':
+if(!isGroup) return reply(mss.grupo)
+if(!isGroupAdmins) return reply(mss.adm)
+if(!isBotGroupAdmins) return reply(mss.botadm)
+if(args.length < 1) return reply(`Use 1 pra ativar ou 0 pra desativar. Caso deseja ativar, use essa forma: ${prefix+comando} 1, caso seja desativar e só trocar o 1 pelo 0.`)
+if(Number(args[0]) === 1) {
+if(isCooldown) return reply('O recurso de cooldown já está ativado.')
+ArquivosDosGrupos[0].cooldown = true
+setGp(ArquivosDosGrupos)
+reply(`Ativou com sucesso o recurso de cooldown neste grupo\n- Os membros poderão usar o comando a cada 4s.\n- Os administradores poderão usar os comandos a cada 2s. \n- O ${donoName}, poderá usar os comandos sem limit.`)
+} else if(Number(args[0]) === 0) {
+if(!isCooldown) return reply('O recurso de cooldown já está desativado.')
+ArquivosDosGrupos[0].cooldown = false
+setGp(ArquivosDosGrupos)
+reply('Desativou com sucesso o recurso de cooldown neste grupo.')
+} else {
+reply('1 para ativar, 0 para desativar.')
+}
+break
+
 case 'totag': 
 case 'cita': 
 case 'hidetag':
@@ -4922,31 +4956,26 @@ botSemKey(subaru, from);
 }
 break;}
  
- 
-case 'pinterest': {
-
-if (!sz) return reply(`📌 Envie o termo da pesquisa. Exemplo:\n${prefixo}pinterest naruto 5`);
-
+ case 'pinterest': {
+try {
+if (!sz) return reply(`📌 Envie o termo da pesquisa.\nExemplo:\n${prefixo}pinterest naruto,5`);
 await reply('⏳ Buscando imagens no Pinterest...');
-
-const [query, qtdStr] = sz.split(',');
+const [queryRaw, qtdStr] = sz.split(',');
+const query = queryRaw?.trim();
 const total = Math.min(Number(qtdStr) || 5, 10);
 let cards = [], i = 1;
-
 for (let count = 0; count < total; count++) {
 try {
-const url = `https://raikken-api.speedhosting.cloud/api/pinterest?query=${query}&apikey=${RaikkenKey}`;
-const buffer = await getBuffer(url); // download da imagem
-
-const { imageMessage } = await generateWAMessageContent({
-image: buffer
-}, {
-upload: subaru.waUploadToServer
-});
+const url = `https://raikken-api.speedhosting.cloud/api/pinterest?query=${encodeURIComponent(query)}&apikey=${RaikkenKey}`;
+const buffer = await getBuffer(url);
+const { imageMessage } = await generateWAMessageContent(
+{ image: buffer },
+{ upload: subaru.waUploadToServer }
+);
 
 cards.push({
 body: proto.Message.InteractiveMessage.Body.fromObject({
-text: `🔍 Resultado ${i++} de *${query.trim()}*`,
+text: `🔍 Resultado ${i++} de *${query}*`,
 }),
 footer: proto.Message.InteractiveMessage.Footer.fromObject({
 text: "> ⚡ via Raikken-API",
@@ -4954,17 +4983,19 @@ text: "> ⚡ via Raikken-API",
 header: proto.Message.InteractiveMessage.Header.fromObject({
 title: "*Pinterest*",
 hasMediaAttachment: true,
-imageMessage
+imageMessage,
 }),
 nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-buttons: [{
+buttons: [
+{
 name: "cta_url",
 buttonParamsJson: JSON.stringify({
 display_text: "Abrir no Pinterest",
-url: `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query.trim())}`,
-merchant_url: `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query.trim())}`
+url: `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`,
+merchant_url: `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`
 })
-}]
+}
+]
 })
 });
 
@@ -4974,7 +5005,8 @@ botSemKey(subaru, from);
 }
 }
 
-if (cards.length === 0) return reply("❌ Não consegui obter imagens. Tente outro termo.");
+if (cards.length === 0)
+return reply("❌ Não consegui obter imagens. Tente outro termo.");
 
 const msg = generateWAMessageFromContent(from, {
 viewOnceMessage: {
@@ -4985,7 +5017,7 @@ deviceListMetadataVersion: 2,
 },
 interactiveMessage: proto.Message.InteractiveMessage.fromObject({
 body: proto.Message.InteractiveMessage.Body.create({
-text: `🔎 Pesquisa por: *${query.trim()}*`,
+text: `🔎 Pesquisa por: *${query}*`,
 }),
 footer: proto.Message.InteractiveMessage.Footer.create({
 text: botName
@@ -5002,6 +5034,10 @@ cards
 }, {});
 
 await subaru.relayMessage(from, msg.message, { messageId: msg.key.id });
+} catch (e) {
+console.error("[❌ Erro Pinterest Carrossel]", e);
+reply("❌ Erro ao gerar o carrossel do Pinterest.");
+}
 break;
 }
 

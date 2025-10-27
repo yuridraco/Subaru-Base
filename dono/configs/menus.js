@@ -160,7 +160,6 @@ return `
 ┃͜⃟${prefix}casal
 ┃͜⃟${prefix}gozar
 ┃͜⃟${prefix}vcprefere
-┃͜⃟${prefix}eununca
 ┃͜⃟${prefix}rankgay
 ┃͜⃟${prefix}rankcasalsin
 ┃͜⃟${prefix}rankfalido

@@ -5,7 +5,7 @@
 * Raikken-API: https://whatsapp.com/channel/0029VbB75r1HFxOvPXYp7Z10
 */
 
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType, makeCacheableSignalKeyStore, cacheService, Browsers } = require("baron-baileys-v2");
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, isJidBroadcast,isJidStatusBroadcast, makeInMemoryStore,getContentType, makeCacheableSignalKeyStore, cacheService } = require("baron-baileys-v2");
 const fs = require('fs')
 const pino = require("pino");
 const chalk = require('chalk')

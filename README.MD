@@ -65,13 +65,18 @@ pkg update && pkg upgrade && pkg install -y git nodejs ffmpeg imagemagick yarn
 
 ### 🧩 Instalação via Git
 1️⃣ Clone o repositório
+```bash
 git clone https://github.com/szkkj/Subaru-Base
-
+```
 2️⃣ Acesse a pasta
+```bash
 cd Subaru-Base/
+```
 
 3️⃣Instale as dependências (se necessário)
+```bash
 npm install
+```
 
 4️⃣ Configure
 Edite o arquivo `./dono/configs/settings.json:`
